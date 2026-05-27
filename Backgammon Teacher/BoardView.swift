@@ -4,6 +4,17 @@ import SwiftUI
 private let topLeft  = [13, 14, 15, 16, 17, 18]; private let topRight = [19, 20, 21, 22, 23, 24]
 private let botLeft  = [12, 11, 10,  9,  8,  7]; private let botRight = [ 6,  5,  4,  3,  2,  1]
 
+// Panel colour palette — enum so it is never a stored property on a View struct.
+private enum PC {
+    static let cream    = Color(red: 0.96, green: 0.90, blue: 0.70)
+    static let dim      = Color(red: 0.65, green: 0.54, blue: 0.38)
+    static let bg       = Color(red: 0.17, green: 0.09, blue: 0.03)
+    static let green    = Color(red: 0.14, green: 0.40, blue: 0.18)
+    static let red      = Color(red: 0.50, green: 0.08, blue: 0.08)
+    static let brown    = Color(red: 0.34, green: 0.20, blue: 0.07)
+    static let tan      = Color(red: 0.58, green: 0.50, blue: 0.32)
+}
+
 // MARK: - BoardView
 
 struct BoardView: View {
@@ -303,102 +314,125 @@ struct BoardView: View {
 
     @ViewBuilder
     private var controlPanel: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 11) {
             if vm.isSetupMode {
-                Text("Board Setup")
-                    .font(.caption.bold().uppercaseSmallCaps())
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
+                panelLabel("BOARD SETUP")
                 HStack(spacing: 6) {
                     setupColorButton(.white, label: "White")
                     setupColorButton(.black, label: "Black")
                 }
-
-                Text("Tap a point to add a checker.\nTap at max (15) or\nopponent to clear.")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Text("Tap a point to add a checker. Tap at max (15) or opponent to clear.")
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundStyle(PC.dim)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
-
-                Button("Clear Board") { vm.clearSetupBoard() }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
-
-                Divider()
-
-                Text("Start game as:")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Button("White starts") { vm.startFromSetup(as: .white) }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
-
-                Button("Black starts") { vm.startFromSetup(as: .black) }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color(white: 0.18))
-                    .frame(maxWidth: .infinity)
+                panelButton("CLEAR", tint: PC.red)   { vm.clearSetupBoard() }
+                Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
+                panelLabel("START AS")
+                panelButton("WHITE", tint: PC.tan)   { vm.startFromSetup(as: .white) }
+                panelButton("BLACK", tint: PC.green) { vm.startFromSetup(as: .black) }
 
             } else if let w = vm.state.winner {
-                Text("\(w == .white ? "White" : "Black") wins!")
-                    .font(.headline.bold())
-                    .multilineTextAlignment(.center)
-                HStack(spacing: 4) {
-                    Text("White").foregroundStyle(Color(white: 0.92))
-                    Text("\(vm.whiteScore) : \(vm.blackScore)").font(.title3.bold())
-                    Text("Black").foregroundStyle(Color(white: 0.55))
-                }
-                .font(.subheadline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
-                .background(Color.black.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
-                VStack(spacing: 8) {
-                    Button("Rematch") { vm.rematch() }
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
-                    Button("New Game") { vm.newGame() }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                }
+                Text("\(w == .white ? "WHITE" : "BLACK") WINS")
+                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.cream)
+                    .kerning(1.5)
+                    .frame(maxWidth: .infinity)
+                scoreChip
+                panelButton("REMATCH",  tint: PC.green) { vm.rematch() }
+                panelButton("NEW GAME", tint: PC.red)   { vm.newGame() }
 
             } else if vm.dice == nil {
-                Button("New Game") { vm.newGame() }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
-                Button("Setup Board") { vm.enterSetupMode() }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
+                panelButton("NEW GAME",    tint: PC.green) { vm.newGame() }
+                panelButton("SETUP BOARD", tint: PC.brown) { vm.enterSetupMode() }
 
             } else {
-                Button("Setup Board") { vm.enterSetupMode() }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
+                panelButton("SETUP BOARD", tint: PC.brown) { vm.enterSetupMode() }
             }
 
             Spacer()
         }
-        .padding(10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(PC.bg)
+                .overlay(RoundedRectangle(cornerRadius: 10)
+                    .stroke(PC.cream.opacity(0.10), lineWidth: 1))
+        )
+        .shadow(color: .black.opacity(0.45), radius: 6, y: 3)
+    }
+
+    private var scoreChip: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(Color(white: 0.93))
+                .overlay(Circle().stroke(Color(white: 0.60), lineWidth: 0.75))
+                .frame(width: 12, height: 12)
+            Text("\(vm.whiteScore)")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(PC.cream)
+            Text(":")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(PC.dim)
+            Text("\(vm.blackScore)")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(PC.cream)
+            Circle()
+                .fill(Color(white: 0.13))
+                .overlay(Circle().stroke(Color(white: 0.50), lineWidth: 0.75))
+                .frame(width: 12, height: 12)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 7)
+        .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(PC.cream.opacity(0.08), lineWidth: 1))
+    }
+
+    private func panelLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 9, weight: .black, design: .rounded))
+            .foregroundStyle(PC.dim)
+            .kerning(2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func panelButton(_ label: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 11, weight: .black, design: .rounded))
+                .foregroundColor(PC.cream)
+                .kerning(1.5)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(LinearGradient(
+                            colors: [tint.opacity(0.80), tint],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        ))
+                        .overlay(RoundedRectangle(cornerRadius: 7)
+                            .stroke(Color.white.opacity(0.13), lineWidth: 1))
+                )
+        }
+        .shadow(color: tint.opacity(0.45), radius: 3, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.28), radius: 2, x: 0, y: 1)
     }
 
     private func setupColorButton(_ color: Player, label: String) -> some View {
         let isSelected = vm.setupColor == color
         let isWhite    = color == .white
         return Button(label) { vm.setupColor = color }
-            .font(.caption.bold())
-            .foregroundStyle(isWhite ? Color.black : Color.white)
+            .font(.system(size: 11, weight: .black, design: .rounded))
+            .foregroundStyle(isWhite ? Color(red: 0.17, green: 0.09, blue: 0.03) : PC.cream)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 6)
+            .padding(.vertical, 7)
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(isWhite ? Color.white : Color(white: 0.12))
-                    .shadow(color: .black.opacity(isSelected ? 0.4 : 0.1), radius: isSelected ? 3 : 1)
+                    .fill(isWhite ? Color(white: 0.90) : Color(white: 0.10))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? PC.cream.opacity(0.65) : Color.clear, lineWidth: 1.5)
             )
     }
 }
