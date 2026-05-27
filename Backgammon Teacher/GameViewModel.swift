@@ -1,5 +1,19 @@
 import SwiftUI
 
+struct FlightInfo: Equatable {
+    let id: UUID
+    let from: Int
+    let to: Int
+    let isWhite: Bool
+
+    init(from: Int, to: Int, isWhite: Bool) {
+        self.id = UUID()
+        self.from = from; self.to = to; self.isWhite = isWhite
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+}
+
 @Observable
 final class GameViewModel {
     var state: BoardState = .makeInitial()
@@ -7,10 +21,20 @@ final class GameViewModel {
     var selectedPoint: Int? = nil
     private(set) var allLegalMoves: [Move] = []
     private var history: [(BoardState, Dice)] = []
+    var flightInfo: FlightInfo? = nil
+    private(set) var diceRollID: Int = 0
+    var dragSource: Int? = nil
+    var dragPosition: CGPoint? = nil
+    private(set) var whiteScore: Int = 0
+    private(set) var blackScore: Int = 0
+    private var scoreRecorded: Bool = false
 
-    var canRoll: Bool { dice == nil && state.winner == nil }
+    var canRoll: Bool { dice == nil && state.winner == nil && !isSetupMode }
     var canUndo: Bool { !history.isEmpty }
     var pendingEndTurn: Bool = false
+
+    var isSetupMode: Bool = false
+    var setupColor: Player = .white
 
     // All points the selected checker can reach — single die, either die, or both dice on
     // the same checker (e.g. rolling 2+5 shows destinations 2 steps, 5 steps, and 7 steps away).
@@ -61,6 +85,7 @@ final class GameViewModel {
         guard canRoll else { return }
         let d = Dice()
         dice = d
+        diceRollID += 1
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
         if allLegalMoves.isEmpty {
             pendingEndTurn = true
@@ -72,20 +97,25 @@ final class GameViewModel {
     }
 
     func tap(point: Int) {
-        if selectedPoint != nil, legalDestinations.contains(point) {
-            commitMove(to: point); return
+        if isSetupMode { tapSetup(point: point); return }
+        guard selectableSources.contains(point), let d = dice else { return }
+        selectedPoint = point   // needed so legalDestinations computes for this checker
+        let player = state.currentPlayer
+        for die in Set(d.remaining).sorted(by: >) {
+            let rawDest = point + player.direction * die
+            if legalDestinations.contains(rawDest) {
+                commitMove(to: rawDest); return
+            }
+            // Die overshoots the board — bear off if legal
+            if !(1...24).contains(rawDest), legalDestinations.contains(player.boreOffPoint) {
+                commitMove(to: player.boreOffPoint); return
+            }
         }
-        if selectableSources.contains(point) {
-            selectedPoint = (selectedPoint == point) ? nil : point
-        }
-    }
-
-    func tapBoreOff() {
-        let dest = state.currentPlayer.boreOffPoint
-        if legalDestinations.contains(dest) { commitMove(to: dest) }
+        selectedPoint = nil   // no single-die move available for this checker
     }
 
     func undoStep() {
+        flightInfo = nil; dragSource = nil; dragPosition = nil
         guard let (prevState, prevDice) = history.popLast() else { return }
         state = prevState
         dice = prevDice
@@ -129,18 +159,83 @@ final class GameViewModel {
     }
 
     private func applyStep(_ step: CheckerMove) {
+        // Skip flight animation for drag moves — the user already positioned the checker manually.
+        if dragPosition == nil {
+            flightInfo = FlightInfo(from: step.from, to: step.to, isWhite: state.currentPlayer == .white)
+        }
         state = state.applying(step)
         dice?.markUsed(die: step.die)
     }
 
+    // Called by the view after a drag gesture ends on a valid destination point.
+    func drop(to dest: Int) {
+        defer { dragSource = nil; dragPosition = nil }
+        guard legalDestinations.contains(dest) else { selectedPoint = nil; return }
+        commitMove(to: dest)
+    }
+
+    func cancelDrag() {
+        dragSource = nil; dragPosition = nil; selectedPoint = nil
+    }
+
     func newGame() {
+        whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil
+        isSetupMode = false
+        rollDice()
+    }
+
+    func rematch() {
+        scoreRecorded = false
+        state = .makeInitial()
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil
+        isSetupMode = false
+        rollDice()
+    }
+
+    func enterSetupMode() {
+        flightInfo = nil
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
+        state = .makeEmpty()
+        isSetupMode = true
+    }
+
+    // Add/clear checkers during board setup. Each tap adds one of setupColor (up to 15).
+    // Tapping opponent checkers clears the point; tapping at the 15-checker cap also clears.
+    private func tapSetup(point: Int) {
+        guard (1...24).contains(point) else { return }
+        let mult = setupColor == .white ? 1 : -1
+        let cur = state.points[point]
+        if cur * mult < 0 || cur * mult >= 15 {
+            state.points[point] = 0
+        } else {
+            state.points[point] += mult
+        }
+    }
+
+    func clearSetupBoard() {
+        state = .makeEmpty()
+    }
+
+    func startFromSetup(as player: Player) {
+        state.currentPlayer = player
+        isSetupMode = false
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
+        rollDice()
     }
 
     func confirmEndTurn() { endTurn() }
 
     private func finishTurn() {
+        if let w = state.winner, !scoreRecorded {
+            if w == .white { whiteScore += state.gameScore } else { blackScore += state.gameScore }
+            scoreRecorded = true
+            endTurn()
+            return
+        }
         guard let d = dice, !d.isDone else { pendingEndTurn = true; return }
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
         if allLegalMoves.isEmpty { pendingEndTurn = true; return }
@@ -151,7 +246,11 @@ final class GameViewModel {
 
     private func endTurn() {
         pendingEndTurn = false
-        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []
-        state.currentPlayer = state.currentPlayer.opponent
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; flightInfo = nil
+        dragSource = nil; dragPosition = nil
+        if state.winner == nil {
+            state.currentPlayer = state.currentPlayer.opponent
+            rollDice()
+        }
     }
 }

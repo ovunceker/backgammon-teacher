@@ -34,6 +34,15 @@ struct BoardState: Hashable {
 
     // MARK: Factory
 
+    static func makeEmpty() -> BoardState {
+        BoardState(
+            points: [Int](repeating: 0, count: 26),
+            whiteBar: 0, blackBar: 0,
+            whiteBorneOff: 0, blackBorneOff: 0,
+            currentPlayer: .white
+        )
+    }
+
     static func makeInitial() -> BoardState {
         var pts = [Int](repeating: 0, count: 26)
         // White checkers (positive values)
@@ -76,6 +85,23 @@ struct BoardState: Hashable {
         if whiteBorneOff == 15 { return .white }
         if blackBorneOff == 15 { return .black }
         return nil
+    }
+
+    // 1 = regular, 2 = gammon, 3 = backgammon
+    var gameScore: Int {
+        guard let w = winner else { return 0 }
+        let loser = w.opponent
+        let loserBorneOff = loser == .white ? whiteBorneOff : blackBorneOff
+        if loserBorneOff > 0 { return 1 }
+        let loserBar  = loser == .white ? whiteBar : blackBar
+        let loserSign = loser == .white ? 1 : -1
+        let inHome    = w.homeRange.contains(where: { points[$0] * loserSign > 0 })
+        if loserBar > 0 || inHome { return 2 }
+        return 2
+    }
+
+    var scoreLabel: String {
+        gameScore == 2 ? "Gammon — 2 points" : "1 point"
     }
 
     // MARK: State transition
