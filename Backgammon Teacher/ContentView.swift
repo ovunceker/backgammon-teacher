@@ -13,6 +13,7 @@ struct ContentView: View {
     var body: some View {
         BoardView()
             .environment(vm)
+            .ignoresSafeArea(.container, edges: [.bottom, .trailing])
     }
 }
 
