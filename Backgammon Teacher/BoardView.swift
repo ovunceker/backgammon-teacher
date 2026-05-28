@@ -25,25 +25,28 @@ struct BoardView: View {
     @State private var diceAnimTask: Task<Void, Never>?
 
     var body: some View {
-        GeometryReader { geo in
-            // Landscape: board fills the height; controls live in a right-side panel.
-            let panelW: CGFloat = 148
-            let pad:    CGFloat = 8
-            let boardH  = geo.size.height - pad * 2
-            let barW    = max(boardH * 0.065, 20)
-            let boardW  = geo.size.width  - panelW - barW - pad * 3
-            let ptH     = (boardH - 20) / 2
-            let ptW     = (boardW - barW) / 12
-            let cSz     = min(ptW * 0.84, ptH / 4.6)
+        ZStack {
+            Color(red: 0.10, green: 0.06, blue: 0.02).ignoresSafeArea()
+            GeometryReader { geo in
+                // Landscape: board fills the height; controls live in a right-side panel.
+                let panelW: CGFloat = 148
+                let pad:    CGFloat = 8
+                let boardH  = geo.size.height - pad * 2
+                let barW    = max(boardH * 0.065, 20)
+                let boardW  = geo.size.width  - panelW - barW - pad * 3
+                let ptH     = (boardH - 20) / 2
+                let ptW     = (boardW - barW) / 12
+                let cSz     = min(ptW * 0.84, ptH / 4.6)
 
-            HStack(alignment: .center, spacing: 0) {
-                boardCanvas(W: boardW, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
-                boreOffTray(trayW: barW, ptH: ptH, cSz: cSz)
-                controlPanel
-                    .frame(width: panelW)
-                    .padding(.leading, pad)
+                HStack(alignment: .center, spacing: 0) {
+                    boardCanvas(W: boardW, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
+                    boreOffTray(trayW: barW, ptH: ptH, cSz: cSz)
+                    controlPanel
+                        .frame(width: panelW)
+                        .padding(.leading, pad)
+                }
+                .padding(pad)
             }
-            .padding(pad)
         }
         .onChange(of: vm.diceRollID) { _, _ in
             guard let dice = vm.dice else { return }
@@ -68,19 +71,24 @@ struct BoardView: View {
 
     private func boardCanvas(W: CGFloat, ptW: CGFloat, ptH: CGFloat, barW: CGFloat, cSz: CGFloat) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(red: 0.42, green: 0.24, blue: 0.10))
-                .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
-            HStack(spacing: 0) {
-                halfPanel(top: topLeft, bot: botLeft, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
-                barPanel(barW: barW, ptW: ptW, ptH: ptH, cSz: cSz)
-                halfPanel(top: topRight, bot: botRight, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
+            // Board surface — clipped so bar/point content can't bleed past the rounded corners.
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(red: 0.42, green: 0.24, blue: 0.10))
+                HStack(spacing: 0) {
+                    halfPanel(top: topLeft, bot: botLeft, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
+                    barPanel(barW: barW, ptW: ptW, ptH: ptH, cSz: cSz)
+                    halfPanel(top: topRight, bot: botRight, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
+                }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
+
+            // Overlays sit outside the clip so flight animation and drag disc can extend freely.
             if vm.dice != nil {
                 boardOverlay(ptW: ptW, barW: barW)
             }
             CheckerFlightOverlay(ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
-            // Dragged checker floating overlay
             if let pos = vm.dragPosition {
                 dragDisc(isWhite: vm.state.currentPlayer == .white, cSz: cSz)
                     .position(pos)
@@ -169,7 +177,7 @@ struct BoardView: View {
                     guard count > 0 else { return }
                     let moved = hypot(val.translation.width, val.translation.height)
                     if moved <= 12 {
-                        vm.cancelDrag()
+                        vm.clearDragState()   // preserve selectedPoint
                         vm.tap(point: pt)
                         return
                     }
@@ -483,7 +491,7 @@ private struct PointView: View {
             .onEnded { val in
                 let moved = hypot(val.translation.width, val.translation.height)
                 if moved <= 12 {
-                    vm.cancelDrag()
+                    vm.clearDragState()   // preserve selectedPoint so two-tap bar entry works
                     vm.tap(point: point)
                     return
                 }

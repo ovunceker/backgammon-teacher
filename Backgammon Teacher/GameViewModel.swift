@@ -98,9 +98,25 @@ final class GameViewModel {
 
     func tap(point: Int) {
         if isSetupMode { tapSetup(point: point); return }
-        guard selectableSources.contains(point), let d = dice else { return }
-        selectedPoint = point   // needed so legalDestinations computes for this checker
+        guard let d = dice else { return }
         let player = state.currentPlayer
+
+        // Hard bar enforcement: if the current player has checkers on the bar,
+        // only the bar point itself or a highlighted entry destination may be tapped.
+        if state.barCount(for: player) > 0 {
+            let isBarPoint  = (point == player.barPoint)
+            let isEntryDest = (selectedPoint == player.barPoint && legalDestinations.contains(point))
+            guard isBarPoint || isEntryDest else { return }
+        }
+
+        // Two-tap path: a source is already selected and the user taps a legal destination.
+        // This lets bar checkers be placed by tapping the highlighted entry point directly.
+        if selectedPoint != nil, legalDestinations.contains(point) {
+            commitMove(to: point); return
+        }
+
+        guard selectableSources.contains(point) else { return }
+        selectedPoint = point   // needed so legalDestinations computes for this checker
         for die in Set(d.remaining).sorted(by: >) {
             let rawDest = point + player.direction * die
             if legalDestinations.contains(rawDest) {
@@ -122,6 +138,9 @@ final class GameViewModel {
         selectedPoint = nil
         pendingEndTurn = false
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: prevDice)
+        if state.barCount(for: state.currentPlayer) > 0 {
+            selectedPoint = state.currentPlayer.barPoint
+        }
     }
 
     private func commitMove(to dest: Int) {
@@ -176,6 +195,12 @@ final class GameViewModel {
 
     func cancelDrag() {
         dragSource = nil; dragPosition = nil; selectedPoint = nil
+    }
+
+    // Clears only the drag overlay state — does NOT clear selectedPoint so that
+    // a bar selection stays visible when a tap resolves without a completed drag.
+    func clearDragState() {
+        dragSource = nil; dragPosition = nil
     }
 
     func newGame() {
