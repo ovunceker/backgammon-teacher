@@ -87,8 +87,10 @@ struct BoardState: Hashable {
         return nil
     }
 
-    // 1 = regular, 2 = gammon, 3 = backgammon
-    var gameScore: Int {
+    // 1 = regular, 2 = gammon, 3 = backgammon (only when advanced = true)
+    var gameScore: Int { score(advanced: false) }
+
+    func score(advanced: Bool) -> Int {
         guard let w = winner else { return 0 }
         let loser = w.opponent
         let loserBorneOff = loser == .white ? whiteBorneOff : blackBorneOff
@@ -96,7 +98,7 @@ struct BoardState: Hashable {
         let loserBar  = loser == .white ? whiteBar : blackBar
         let loserSign = loser == .white ? 1 : -1
         let inHome    = w.homeRange.contains(where: { points[$0] * loserSign > 0 })
-        if loserBar > 0 || inHome { return 2 }
+        if loserBar > 0 || inHome { return advanced ? 3 : 2 }
         return 2
     }
 

@@ -31,12 +31,38 @@ final class GameViewModel {
     private var scoreRecorded: Bool = false
     private(set) var noMovesAvailable: Bool = false
     private(set) var resignedWinner: Player? = nil
+    private(set) var droppedWinner: Player? = nil
     private var autoEndTask: Task<Void, Never>?
     private var autoPlayTask: Task<Void, Never>?
     private var isAutoPlayInProgress: Bool = false
 
-    var effectiveWinner: Player? { resignedWinner ?? state.winner }
-    var canRoll: Bool { dice == nil && state.winner == nil && resignedWinner == nil && !isSetupMode }
+    // MARK: Settings
+    var advancedMode: Bool = UserDefaults.standard.bool(forKey: "advancedMode") {
+        didSet {
+            UserDefaults.standard.set(advancedMode, forKey: "advancedMode")
+            // Toggling advanced off while waiting to roll → auto-roll so game isn't stuck
+            if !advancedMode && pendingRoll && !pendingDouble { rollDice() }
+        }
+    }
+
+    // MARK: Doubling cube + turn-start gate (active only when advancedMode is on)
+    private(set) var cubeValue: Int = 1
+    private(set) var cubeOwner: Player? = nil   // nil = centred
+    private(set) var pendingDouble: Bool = false
+    private(set) var pendingRoll: Bool = false   // true = player must Roll or Double before dice appear
+
+    var canDouble: Bool {
+        guard advancedMode, pendingRoll, !pendingDouble else { return false }
+        guard effectiveWinner == nil, !isSetupMode else { return false }
+        guard cubeValue < 64 else { return false }
+        return cubeOwner == nil || cubeOwner == state.currentPlayer
+    }
+
+    var effectiveWinner: Player? { resignedWinner ?? droppedWinner ?? state.winner }
+    var canRoll: Bool {
+        guard state.winner == nil, resignedWinner == nil, droppedWinner == nil, !isSetupMode, !pendingDouble else { return false }
+        return advancedMode ? pendingRoll : dice == nil
+    }
     var canUndo: Bool { !history.isEmpty }
     var pendingEndTurn: Bool = false
 
@@ -88,8 +114,13 @@ final class GameViewModel {
         return sources
     }
 
+    private func startTurn() {
+        if advancedMode { pendingRoll = true } else { rollDice() }
+    }
+
     func rollDice() {
         guard canRoll else { return }
+        pendingRoll = false
         let d = Dice()
         dice = d
         diceRollID += 1
@@ -224,31 +255,34 @@ final class GameViewModel {
     func newGame() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false; resignedWinner = nil
+        noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false
         whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
         isSetupMode = false
-        rollDice()
+        startTurn()
     }
 
     func rematch() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false; resignedWinner = nil
+        noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false
         scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
         isSetupMode = false
-        rollDice()
+        startTurn()
     }
 
     func enterSetupMode() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false; resignedWinner = nil
+        noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false
         flightInfo = nil
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         state = .makeEmpty()
@@ -275,17 +309,39 @@ final class GameViewModel {
     func startFromSetup(as player: Player) {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false; resignedWinner = nil
+        noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         state.currentPlayer = player
         isSetupMode = false
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
-        rollDice()
+        startTurn()
+    }
+
+    func offerDouble() {
+        guard canDouble else { return }
+        pendingDouble = true
+    }
+
+    func acceptDouble() {
+        cubeValue *= 2
+        cubeOwner = state.currentPlayer.opponent   // acceptor (opponent) now owns it
+        pendingDouble = false
+    }
+
+    func dropDouble() {
+        let winner = state.currentPlayer  // offerer wins when opponent drops
+        let pts = cubeValue
+        if winner == .white { whiteScore += pts } else { blackScore += pts }
+        scoreRecorded = true
+        droppedWinner = winner   // allows rematch, unlike resignedWinner
+        pendingDouble = false; pendingRoll = false
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
     func resign() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false
+        noMovesAvailable = false; pendingRoll = false
         resignedWinner = state.currentPlayer.opponent
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
@@ -295,7 +351,8 @@ final class GameViewModel {
 
     private func finishTurn() {
         if let w = state.winner, !scoreRecorded {
-            if w == .white { whiteScore += state.gameScore } else { blackScore += state.gameScore }
+            let pts = state.score(advanced: advancedMode) * cubeValue
+            if w == .white { whiteScore += pts } else { blackScore += pts }
             scoreRecorded = true
             endTurn()
             return
@@ -341,12 +398,12 @@ final class GameViewModel {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         noMovesAvailable = false
-        pendingEndTurn = false
+        pendingEndTurn = false; pendingRoll = false
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; flightInfo = nil
         dragSource = nil; dragPosition = nil
         if state.winner == nil {
             state.currentPlayer = state.currentPlayer.opponent
-            rollDice()
+            startTurn()
         }
     }
 }

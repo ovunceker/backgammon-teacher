@@ -23,22 +23,25 @@ struct BoardView: View {
     @State private var diceDisplayValues: [Int] = []
     @State private var diceRolling = false
     @State private var diceAnimTask: Task<Void, Never>?
+    @State private var showSettings = false
 
     var body: some View {
         ZStack {
             Color(red: 0.10, green: 0.06, blue: 0.02).ignoresSafeArea()
             GeometryReader { geo in
                 // Landscape: board fills the height; controls live in a right-side panel.
+                let leftW:  CGFloat = 0    // left panel — Settings button + future controls
                 let panelW: CGFloat = 148
                 let pad:    CGFloat = 8
                 let boardH  = geo.size.height - pad * 2
                 let barW    = max(boardH * 0.065, 20)
-                let boardW  = geo.size.width  - panelW - barW - pad * 3
+                let boardW  = geo.size.width - leftW - panelW - barW - pad * 3
                 let ptH     = (boardH - 20) / 2
                 let ptW     = (boardW - barW) / 12
                 let cSz     = min(ptW * 0.84, ptH / 4.6)
 
                 HStack(alignment: .center, spacing: 0) {
+                    Color.clear.frame(width: leftW)   // left panel placeholder
                     boardCanvas(W: boardW, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
                     boreOffTray(trayW: barW, ptH: ptH, cSz: cSz)
                     controlPanel
@@ -47,6 +50,21 @@ struct BoardView: View {
                 }
                 .padding(pad)
             }
+        }
+        .overlay(alignment: .bottomLeading) {
+            Button { showSettings = true } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(PC.dim)
+                    .padding(9)
+                    .background(PC.bg.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(PC.cream.opacity(0.10), lineWidth: 1))
+            }
+            .padding(.leading, -40)
+            .padding(.bottom, 9)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView().environment(vm)
         }
         .onChange(of: vm.diceRollID) { _, _ in
             guard let dice = vm.dice else { return }
@@ -85,7 +103,7 @@ struct BoardView: View {
             .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
 
             // Overlays sit outside the clip so flight animation and drag disc can extend freely.
-            if vm.dice != nil {
+            if vm.dice != nil || vm.pendingDouble || vm.pendingRoll {
                 boardOverlay(ptW: ptW, barW: barW)
             }
             CheckerFlightOverlay(ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
@@ -195,30 +213,52 @@ struct BoardView: View {
 
     // Dice and Undo/Done buttons centred in the right half (white) or left half (black).
     private func boardOverlay(ptW: CGFloat, barW: CGFloat) -> some View {
-        let isWhite = vm.state.currentPlayer == .white
+        let isWhite = vm.pendingDouble
+            ? vm.state.currentPlayer.opponent == .white
+            : vm.state.currentPlayer == .white
         let dSz: CGFloat = min(ptW * 0.74, 40)
         let xOff = ptW * 3 + barW / 2
 
         return VStack(spacing: 10) {
-            if let d = vm.dice, !d.remaining.isEmpty {
-                let displayVals = diceRolling ? diceDisplayValues : d.remaining
-                diceContent(values: displayVals.isEmpty ? d.remaining : displayVals, dSz: dSz)
-            }
-            if vm.noMovesAvailable {
-                Text("NO AVAILABLE MOVES")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(PC.cream)
-                    .kerning(1.5)
-                    .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 7))
-                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(PC.cream.opacity(0.15), lineWidth: 1))
-            } else if vm.canUndo || vm.pendingEndTurn {
+            if vm.pendingDouble {
+                // Cube offered — opponent chooses
+                Text("CUBE OFFERED  ×\(vm.cubeValue * 2)")
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.cream).kerning(1.5)
+                    .padding(.horizontal, 10).padding(.vertical, 5)
+                    .background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 6))
                 HStack(spacing: 10) {
-                    if vm.canUndo {
-                        gameButton("UNDO", tint: Color(red: 0.58, green: 0.08, blue: 0.08)) { vm.undoStep() }
-                    }
-                    if vm.pendingEndTurn {
-                        gameButton("DONE", tint: Color(red: 0.14, green: 0.42, blue: 0.18)) { vm.confirmEndTurn() }
+                    gameButton("ACCEPT", tint: Color(red: 0.14, green: 0.42, blue: 0.18)) { vm.acceptDouble() }
+                    gameButton("DROP",   tint: Color(red: 0.58, green: 0.08, blue: 0.08)) { vm.dropDouble() }
+                }
+            } else if vm.pendingRoll {
+                // Start-of-turn gate: player chooses to double or roll
+                if vm.canDouble {
+                    gameButton("DOUBLE  ×\(vm.cubeValue * 2)",
+                               tint: Color(red: 0.48, green: 0.32, blue: 0.06)) { vm.offerDouble() }
+                }
+                gameButton("ROLL", tint: Color(red: 0.14, green: 0.42, blue: 0.18)) { vm.rollDice() }
+            } else {
+                // Normal mid-turn: dice + undo/done
+                if let d = vm.dice, !d.remaining.isEmpty {
+                    let displayVals = diceRolling ? diceDisplayValues : d.remaining
+                    diceContent(values: displayVals.isEmpty ? d.remaining : displayVals, dSz: dSz)
+                }
+                if vm.noMovesAvailable {
+                    Text("NO AVAILABLE MOVES")
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundStyle(PC.cream).kerning(1.5)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 7))
+                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(PC.cream.opacity(0.15), lineWidth: 1))
+                } else if vm.canUndo || vm.pendingEndTurn {
+                    HStack(spacing: 10) {
+                        if vm.canUndo {
+                            gameButton("UNDO", tint: Color(red: 0.58, green: 0.08, blue: 0.08)) { vm.undoStep() }
+                        }
+                        if vm.pendingEndTurn {
+                            gameButton("DONE", tint: Color(red: 0.14, green: 0.42, blue: 0.18)) { vm.confirmEndTurn() }
+                        }
                     }
                 }
             }
@@ -350,6 +390,7 @@ struct BoardView: View {
 
             } else if let w = vm.effectiveWinner {
                 let resigned = vm.resignedWinner != nil
+                let dropped  = vm.droppedWinner  != nil
                 Text(resigned
                      ? "\(w.opponent == .white ? "WHITE" : "BLACK") RESIGNED"
                      : "\(w == .white ? "WHITE" : "BLACK") WINS")
@@ -362,6 +403,7 @@ struct BoardView: View {
                     panelButton("REMATCH", tint: PC.green) { vm.rematch() }
                 }
                 panelButton("NEW GAME", tint: PC.red) { vm.newGame() }
+                let _ = dropped   // suppress unused-variable warning
 
             } else if vm.dice == nil {
                 panelButton("NEW GAME",    tint: PC.green) { vm.newGame() }
@@ -778,5 +820,73 @@ private struct DiceFaceView: View {
         }
         .frame(width: size + depth, height: size + depth)
         .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Settings sheet
+
+private struct SettingsView: View {
+    @Environment(GameViewModel.self) private var vm
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        @Bindable var vm = vm
+        ZStack {
+            Color(red: 0.12, green: 0.07, blue: 0.02).ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                // Header
+                HStack(spacing: 10) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 18, weight: .black))
+                        .foregroundStyle(PC.cream)
+                    Text("SETTINGS")
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .foregroundStyle(PC.cream)
+                        .kerning(2)
+                    Spacer()
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(PC.dim)
+                    }
+                }
+                .padding(.bottom, 20)
+
+                Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
+                    .padding(.bottom, 20)
+
+                // Advanced mode toggle
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("ADVANCED MODE")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("Enables 3-point backgammon endings and the doubling cube")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.advancedMode)
+                        .tint(PC.green)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                Spacer()
+            }
+            .padding(24)
+        }
+        .presentationDetents([.medium])
+        .presentationBackground(Color(red: 0.12, green: 0.07, blue: 0.02))
+        .presentationCornerRadius(16)
+        .preferredColorScheme(.dark)
     }
 }
