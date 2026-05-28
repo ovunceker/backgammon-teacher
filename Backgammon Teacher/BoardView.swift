@@ -204,7 +204,15 @@ struct BoardView: View {
                 let displayVals = diceRolling ? diceDisplayValues : d.remaining
                 diceContent(values: displayVals.isEmpty ? d.remaining : displayVals, dSz: dSz)
             }
-            if vm.canUndo || vm.pendingEndTurn {
+            if vm.noMovesAvailable {
+                Text("NO AVAILABLE MOVES")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.cream)
+                    .kerning(1.5)
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 7))
+                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(PC.cream.opacity(0.15), lineWidth: 1))
+            } else if vm.canUndo || vm.pendingEndTurn {
                 HStack(spacing: 10) {
                     if vm.canUndo {
                         gameButton("UNDO", tint: Color(red: 0.58, green: 0.08, blue: 0.08)) { vm.undoStep() }
@@ -637,9 +645,11 @@ private struct CheckerFlightOverlay: View {
                 // Let the src-position render commit before animating
                 try? await Task.sleep(for: .milliseconds(16))
                 guard !Task.isCancelled else { return }
+                let duration: Double = flight.isAutoPlay ? 0.40 : 0.25
+                let holdMs: Int      = flight.isAutoPlay ? 700  : 300
                 visible = true
-                withAnimation(.easeInOut(duration: 0.25)) { animPos = dst }
-                try? await Task.sleep(for: .milliseconds(300))
+                withAnimation(.easeInOut(duration: duration)) { animPos = dst }
+                try? await Task.sleep(for: .milliseconds(holdMs))
                 guard !Task.isCancelled else { return }
                 visible = false
                 vm.flightInfo = nil

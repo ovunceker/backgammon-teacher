@@ -5,10 +5,11 @@ struct FlightInfo: Equatable {
     let from: Int
     let to: Int
     let isWhite: Bool
+    let isAutoPlay: Bool
 
-    init(from: Int, to: Int, isWhite: Bool) {
+    init(from: Int, to: Int, isWhite: Bool, isAutoPlay: Bool = false) {
         self.id = UUID()
-        self.from = from; self.to = to; self.isWhite = isWhite
+        self.from = from; self.to = to; self.isWhite = isWhite; self.isAutoPlay = isAutoPlay
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
@@ -28,6 +29,10 @@ final class GameViewModel {
     private(set) var whiteScore: Int = 0
     private(set) var blackScore: Int = 0
     private var scoreRecorded: Bool = false
+    private(set) var noMovesAvailable: Bool = false
+    private var autoEndTask: Task<Void, Never>?
+    private var autoPlayTask: Task<Void, Never>?
+    private var isAutoPlayInProgress: Bool = false
 
     var canRoll: Bool { dice == nil && state.winner == nil && !isSetupMode }
     var canUndo: Bool { !history.isEmpty }
@@ -88,12 +93,14 @@ final class GameViewModel {
         diceRollID += 1
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
         if allLegalMoves.isEmpty {
-            pendingEndTurn = true
+            noMovesAvailable = true
+            scheduleAutoEnd()
             return
         }
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
         }
+        scheduleAutoPlay(delay: 1500)
     }
 
     func tap(point: Int) {
@@ -131,6 +138,9 @@ final class GameViewModel {
     }
 
     func undoStep() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
         guard let (prevState, prevDice) = history.popLast() else { return }
         state = prevState
@@ -144,6 +154,7 @@ final class GameViewModel {
     }
 
     private func commitMove(to dest: Int) {
+        autoPlayTask?.cancel()
         guard let src = selectedPoint, let snap = dice else { return }
         history.append((state, snap))
         let player = state.currentPlayer
@@ -180,7 +191,7 @@ final class GameViewModel {
     private func applyStep(_ step: CheckerMove) {
         // Skip flight animation for drag moves — the user already positioned the checker manually.
         if dragPosition == nil {
-            flightInfo = FlightInfo(from: step.from, to: step.to, isWhite: state.currentPlayer == .white)
+            flightInfo = FlightInfo(from: step.from, to: step.to, isWhite: state.currentPlayer == .white, isAutoPlay: isAutoPlayInProgress)
         }
         state = state.applying(step)
         dice?.markUsed(die: step.die)
@@ -204,6 +215,9 @@ final class GameViewModel {
     }
 
     func newGame() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -213,6 +227,9 @@ final class GameViewModel {
     }
 
     func rematch() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -222,6 +239,9 @@ final class GameViewModel {
     }
 
     func enterSetupMode() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         flightInfo = nil
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         state = .makeEmpty()
@@ -246,6 +266,9 @@ final class GameViewModel {
     }
 
     func startFromSetup(as player: Player) {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         state.currentPlayer = player
         isSetupMode = false
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
@@ -263,13 +286,45 @@ final class GameViewModel {
         }
         guard let d = dice, !d.isDone else { pendingEndTurn = true; return }
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
-        if allLegalMoves.isEmpty { pendingEndTurn = true; return }
+        if allLegalMoves.isEmpty { noMovesAvailable = true; scheduleAutoEnd(); return }
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
+        }
+        scheduleAutoPlay(delay: 900)
+    }
+
+    private func uniqueForcedStep() -> CheckerMove? {
+        guard let firstStep = allLegalMoves.first?.first else { return nil }
+        return allLegalMoves.allSatisfy { $0.first?.from == firstStep.from && $0.first?.to == firstStep.to }
+            ? firstStep : nil
+    }
+
+    private func scheduleAutoPlay(delay: Int) {
+        guard let step = uniqueForcedStep() else { return }
+        autoPlayTask?.cancel()
+        autoPlayTask = Task {
+            try? await Task.sleep(for: .milliseconds(delay))
+            guard !Task.isCancelled else { return }
+            selectedPoint = step.from
+            isAutoPlayInProgress = true
+            commitMove(to: step.to)
+            isAutoPlayInProgress = false
+        }
+    }
+
+    private func scheduleAutoEnd() {
+        autoEndTask?.cancel()
+        autoEndTask = Task {
+            try? await Task.sleep(for: .milliseconds(1500))
+            guard !Task.isCancelled else { return }
+            endTurn()
         }
     }
 
     private func endTurn() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
         pendingEndTurn = false
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; flightInfo = nil
         dragSource = nil; dragPosition = nil
