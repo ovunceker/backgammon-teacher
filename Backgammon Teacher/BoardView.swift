@@ -488,6 +488,7 @@ private struct PointView: View {
                 let moved = hypot(val.translation.width, val.translation.height)
                 guard moved > 12 else { return }
                 if vm.dragSource == nil {
+                    guard vm.state.barCount(for: vm.state.currentPlayer) == 0 else { return }
                     guard vm.selectableSources.contains(point) else { return }
                     vm.dragSource = point
                     vm.selectedPoint = point

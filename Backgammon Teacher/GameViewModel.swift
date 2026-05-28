@@ -205,7 +205,12 @@ final class GameViewModel {
     }
 
     func cancelDrag() {
-        dragSource = nil; dragPosition = nil; selectedPoint = nil
+        dragSource = nil; dragPosition = nil
+        if dice != nil, state.barCount(for: state.currentPlayer) > 0 {
+            selectedPoint = state.currentPlayer.barPoint
+        } else {
+            selectedPoint = nil
+        }
     }
 
     // Clears only the drag overlay state — does NOT clear selectedPoint so that
