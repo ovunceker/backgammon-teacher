@@ -348,22 +348,29 @@ struct BoardView: View {
                 panelButton("WHITE", tint: PC.tan)   { vm.startFromSetup(as: .white) }
                 panelButton("BLACK", tint: PC.green) { vm.startFromSetup(as: .black) }
 
-            } else if let w = vm.state.winner {
-                Text("\(w == .white ? "WHITE" : "BLACK") WINS")
+            } else if let w = vm.effectiveWinner {
+                let resigned = vm.resignedWinner != nil
+                Text(resigned
+                     ? "\(w.opponent == .white ? "WHITE" : "BLACK") RESIGNED"
+                     : "\(w == .white ? "WHITE" : "BLACK") WINS")
                     .font(.system(size: 13, weight: .black, design: .rounded))
                     .foregroundStyle(PC.cream)
                     .kerning(1.5)
                     .frame(maxWidth: .infinity)
                 scoreChip
-                panelButton("REMATCH",  tint: PC.green) { vm.rematch() }
-                panelButton("NEW GAME", tint: PC.red)   { vm.newGame() }
+                if !resigned {
+                    panelButton("REMATCH", tint: PC.green) { vm.rematch() }
+                }
+                panelButton("NEW GAME", tint: PC.red) { vm.newGame() }
 
             } else if vm.dice == nil {
                 panelButton("NEW GAME",    tint: PC.green) { vm.newGame() }
                 panelButton("SETUP BOARD", tint: PC.brown) { vm.enterSetupMode() }
+                panelButton("RESIGN",      tint: PC.red)   { vm.resign() }
 
             } else {
                 panelButton("SETUP BOARD", tint: PC.brown) { vm.enterSetupMode() }
+                panelButton("RESIGN",      tint: PC.red)   { vm.resign() }
             }
 
             Spacer()
@@ -662,7 +669,10 @@ private struct CheckerFlightOverlay: View {
         switch f.from {
         case 25: return CGPoint(x: ptW * 6 + barW / 2, y: boardH - cSz * 2)  // white bar
         case 0:  return CGPoint(x: ptW * 6 + barW / 2, y: cSz * 2)           // black bar
-        default: return CGPoint(x: ptX(f.from), y: ptY(f.from))
+        default:
+            // State already reflects the removal, so original count = current + 1.
+            let n = abs(vm.state.points[f.from]) + 1
+            return CGPoint(x: ptX(f.from), y: stackTopY(f.from, count: n))
         }
     }
 
@@ -670,8 +680,19 @@ private struct CheckerFlightOverlay: View {
         switch f.to {
         case 0:  return CGPoint(x: boardW + cSz, y: boardH * 0.75)  // white bore-off (off right)
         case 25: return CGPoint(x: boardW + cSz, y: boardH * 0.25)  // black bore-off (off right)
-        default: return CGPoint(x: ptX(f.to), y: ptY(f.to))
+        default:
+            // State already reflects the addition, so current count = final count.
+            let m = abs(vm.state.points[f.to])
+            return CGPoint(x: ptX(f.to), y: stackTopY(f.to, count: m))
         }
+    }
+
+    // Y-coordinate of the top checker in a stack of `count` on point `p`.
+    private func stackTopY(_ p: Int, count: Int) -> CGFloat {
+        let n = max(count, 1)
+        let step: CGFloat = n > 1 ? min(cSz * 0.72, (ptH - cSz) / CGFloat(n - 1)) : cSz
+        let offset = CGFloat(n - 1) * step
+        return (13...24).contains(p) ? cSz / 2 + offset : boardH - cSz / 2 - offset
     }
 
     private func ptX(_ p: Int) -> CGFloat {
@@ -682,10 +703,6 @@ private struct CheckerFlightOverlay: View {
         case 1...6:   return ptW * 6 + barW + CGFloat(6 - p) * ptW + ptW / 2
         default:      return boardW / 2
         }
-    }
-
-    private func ptY(_ p: Int) -> CGFloat {
-        (13...24).contains(p) ? cSz / 2 : boardH - cSz / 2
     }
 
     private func disc(isWhite: Bool) -> some View {

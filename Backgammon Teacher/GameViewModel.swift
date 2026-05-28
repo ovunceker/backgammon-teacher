@@ -30,11 +30,13 @@ final class GameViewModel {
     private(set) var blackScore: Int = 0
     private var scoreRecorded: Bool = false
     private(set) var noMovesAvailable: Bool = false
+    private(set) var resignedWinner: Player? = nil
     private var autoEndTask: Task<Void, Never>?
     private var autoPlayTask: Task<Void, Never>?
     private var isAutoPlayInProgress: Bool = false
 
-    var canRoll: Bool { dice == nil && state.winner == nil && !isSetupMode }
+    var effectiveWinner: Player? { resignedWinner ?? state.winner }
+    var canRoll: Bool { dice == nil && state.winner == nil && resignedWinner == nil && !isSetupMode }
     var canUndo: Bool { !history.isEmpty }
     var pendingEndTurn: Bool = false
 
@@ -222,7 +224,7 @@ final class GameViewModel {
     func newGame() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false
+        noMovesAvailable = false; resignedWinner = nil
         whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -234,7 +236,7 @@ final class GameViewModel {
     func rematch() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false
+        noMovesAvailable = false; resignedWinner = nil
         scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -246,7 +248,7 @@ final class GameViewModel {
     func enterSetupMode() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false
+        noMovesAvailable = false; resignedWinner = nil
         flightInfo = nil
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         state = .makeEmpty()
@@ -273,11 +275,20 @@ final class GameViewModel {
     func startFromSetup(as player: Player) {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
-        noMovesAvailable = false
+        noMovesAvailable = false; resignedWinner = nil
         state.currentPlayer = player
         isSetupMode = false
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
         rollDice()
+    }
+
+    func resign() {
+        autoEndTask?.cancel()
+        autoPlayTask?.cancel()
+        noMovesAvailable = false
+        resignedWinner = state.currentPlayer.opponent
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
     func confirmEndTurn() { endTurn() }
