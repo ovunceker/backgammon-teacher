@@ -335,6 +335,8 @@ struct BoardView: View {
         }
         .frame(width: trayW, height: ptH * 2 + 20)
         .background(Color(red: 0.26, green: 0.14, blue: 0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
     }
 
     @ViewBuilder
