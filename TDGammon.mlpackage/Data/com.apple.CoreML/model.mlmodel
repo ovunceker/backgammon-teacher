@@ -1,0 +1,233 @@
+‹
+
+x*	
+È €R
+output
+*
+ €¢ß¢+
+$com.github.apple.coremltools.version9.0¢:
+,com.github.apple.coremltools.conversion_date
+2026-05-30¢:
++com.github.apple.coremltools.source_dialectTorchScript¢4
+#com.github.apple.coremltools.sourcetorch==2.12.0²î€
+main÷
+
+x
+
+
+ÈCoreML5Ñ
+CoreML5Åoutputf
+const
+x_to_fp16_dtype_0
+*'
+name
+
+"
+x_to_fp16_dtype_0*
+val
+
+
+"
+fp16£
+const,
+var_0_weight_to_fp16
+
+
+ 
+È*)
+name!
+
+"
+op_0_weight_to_fp16*A
+val:
+
+
+ 
+È*"
+@model_path/weights/weight.bin@“
+const#
+var_0_bias_to_fp16
+
+
+ *'
+name
+
+"
+op_0_bias_to_fp16*<
+val5
+
+
+ *$
+@model_path/weights/weight.bin€õr
+cast
+
+x
+
+x
+dtype
+
+x_to_fp16_dtype_0 
+	x_to_fp16
+
+
+
+È*
+name
+
+
+"
+cast_1µ
+linear
+x
+
+	x_to_fp16"
+weight
+
+var_0_weight_to_fp16
+bias
+
+var_0_bias_to_fp16)
+linear_0_cast_fp16
+
+
+
+ *(
+name 
+
+"
+linear_0_cast_fp16y
+sigmoid
+x
+
+linear_0_cast_fp16(
+input_5_cast_fp16
+
+
+
+ *'
+name
+
+"
+input_5_cast_fp16£
+const+
+var_2_weight_to_fp16
+
+
+
+ *)
+name!
+
+"
+op_2_weight_to_fp16*B
+val;
+
+
+
+ *$
+@model_path/weights/weight.bin€ø
+const"
+var_2_bias_to_fp16
+
+
+
+*'
+name
+
+"
+op_2_bias_to_fp16*)
+val"
+
+
+
+
+:
+õ­Y±£±…±j±²¼
+linear
+x
+
+input_5_cast_fp16"
+weight
+
+var_2_weight_to_fp16
+bias
+
+var_2_bias_to_fp16(
+linear_1_cast_fp16
+
+
+
+*(
+name 
+
+"
+linear_1_cast_fp16u
+sigmoid
+x
+
+linear_1_cast_fp16&
+var_11_cast_fp16
+
+
+
+*%
+name
+
+"
+op_11_cast_fp16ƒ
+const(
+ var_11_cast_fp16_to_fp32_dtype_0
+*5
+name-
+%
+#"!
+op_11_cast_fp16_to_fp32_dtype_0*
+val
+
+
+"
+fp32Œ
+cast
+x
+
+var_11_cast_fp16-
+dtype$
+"
+ var_11_cast_fp16_to_fp32_dtype_0
+output
+
+
+*
+name
+
+
+"
+cast_0"æ
+	buildInfoØ"
+
+
+Å"Â
+6
+!
+
+"
+coremltools-version
+	
+"
+9.0
+A
+)
+!
+"
+coremltools-component-torch
+
+
+"
+2.12.0
+E
+(
+ 
+"
+coremltools-source-dialect
+
+"
+TorchScript

@@ -103,9 +103,11 @@ struct BoardView: View {
             .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
 
             // Overlays sit outside the clip so flight animation and drag disc can extend freely.
-            if vm.dice != nil || vm.pendingDouble || vm.pendingRoll {
-                boardOverlay(ptW: ptW, barW: barW)
-            }
+            // Hide overlay while white's double offer awaits AI response (pendingDouble + white offered)
+            let showOverlay = vm.cubeResponseMessage != nil ||
+                (vm.pendingDouble && vm.state.currentPlayer == .black) ||
+                (!vm.pendingDouble && (vm.dice != nil || vm.pendingRoll))
+            if showOverlay { boardOverlay(ptW: ptW, barW: barW) }
             CheckerFlightOverlay(ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
             if let pos = vm.dragPosition {
                 dragDisc(isWhite: vm.state.currentPlayer == .white, cSz: cSz)
@@ -213,15 +215,41 @@ struct BoardView: View {
 
     // Dice and Undo/Done buttons centred in the right half (white) or left half (black).
     private func boardOverlay(ptW: CGFloat, barW: CGFloat) -> some View {
-        let isWhite = vm.pendingDouble
-            ? vm.state.currentPlayer.opponent == .white
-            : vm.state.currentPlayer == .white
+        let isWhite: Bool
+        if vm.cubeResponseMessage != nil {
+            isWhite = false  // show on black's side
+        } else if vm.pendingDouble {
+            isWhite = vm.state.currentPlayer.opponent == .white
+        } else {
+            isWhite = vm.state.currentPlayer == .white
+        }
         let dSz: CGFloat = min(ptW * 0.74, 40)
         let xOff = ptW * 3 + barW / 2
 
         return VStack(spacing: 10) {
-            if vm.pendingDouble {
-                // Cube offered — opponent chooses
+            if let msg = vm.cubeResponseMessage {
+                // AI responded to white's double offer — same look as ACCEPT/DROP buttons
+                let tint: Color = msg == "Accepted"
+                    ? Color(red: 0.14, green: 0.42, blue: 0.18)
+                    : Color(red: 0.58, green: 0.08, blue: 0.08)
+                Text(msg)
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundColor(Color(red: 0.96, green: 0.90, blue: 0.70))
+                    .kerning(2)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7)
+                            .fill(LinearGradient(
+                                colors: [tint.opacity(0.80), tint],
+                                startPoint: .topLeading, endPoint: .bottomTrailing
+                            ))
+                            .overlay(RoundedRectangle(cornerRadius: 7)
+                                .stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    )
+                    .shadow(color: tint.opacity(0.55), radius: 4, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.30), radius: 2, x: 0, y: 1)
+            } else if vm.pendingDouble {
+                // Cube offered by black — white (human) chooses
                 Text("CUBE OFFERED  ×\(vm.cubeValue * 2)")
                     .font(.system(size: 10, weight: .black, design: .rounded))
                     .foregroundStyle(PC.cream).kerning(1.5)

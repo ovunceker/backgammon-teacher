@@ -30,6 +30,7 @@ final class GameViewModel {
     private(set) var blackScore: Int = 0
     private var scoreRecorded: Bool = false
     private(set) var noMovesAvailable: Bool = false
+    var cubeResponseMessage: String? = nil
     private(set) var resignedWinner: Player? = nil
     private(set) var droppedWinner: Player? = nil
     private var autoEndTask: Task<Void, Never>?
@@ -61,9 +62,10 @@ final class GameViewModel {
     var effectiveWinner: Player? { resignedWinner ?? droppedWinner ?? state.winner }
     var canRoll: Bool {
         guard state.winner == nil, resignedWinner == nil, droppedWinner == nil, !isSetupMode, !pendingDouble else { return false }
-        return advancedMode ? pendingRoll : dice == nil
+        if advancedMode && state.currentPlayer == .white { return pendingRoll }
+        return dice == nil
     }
-    var canUndo: Bool { !history.isEmpty }
+    var canUndo: Bool { !history.isEmpty && state.currentPlayer == .white }
     var pendingEndTurn: Bool = false
 
     var isSetupMode: Bool = false
@@ -115,7 +117,13 @@ final class GameViewModel {
     }
 
     private func startTurn() {
-        if advancedMode { pendingRoll = true } else { rollDice() }
+        if advancedMode && state.currentPlayer == .white {
+            pendingRoll = true
+        } else if advancedMode && state.currentPlayer == .black {
+            scheduleAICubeDecision()
+        } else {
+            rollDice()
+        }
     }
 
     func rollDice() {
@@ -133,7 +141,11 @@ final class GameViewModel {
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
         }
-        scheduleAutoPlay(delay: 1500)
+        if state.currentPlayer == .black {
+            scheduleAIPlay(delay: 1500)
+        } else {
+            scheduleAutoPlay(delay: 1500)
+        }
     }
 
     func tap(point: Int) {
@@ -256,7 +268,7 @@ final class GameViewModel {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
-        cubeValue = 1; cubeOwner = nil; pendingDouble = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -269,7 +281,7 @@ final class GameViewModel {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
-        cubeValue = 1; cubeOwner = nil; pendingDouble = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         scoreRecorded = false
         state = .makeInitial()
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
@@ -282,7 +294,7 @@ final class GameViewModel {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
-        cubeValue = 1; cubeOwner = nil; pendingDouble = false
+        cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         flightInfo = nil
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
         state = .makeEmpty()
@@ -319,12 +331,16 @@ final class GameViewModel {
     func offerDouble() {
         guard canDouble else { return }
         pendingDouble = true
+        // Black (AI) auto-responds to white's double offer
+        if state.currentPlayer == .white { scheduleAICubeResponse() }
     }
 
     func acceptDouble() {
         cubeValue *= 2
         cubeOwner = state.currentPlayer.opponent   // acceptor (opponent) now owns it
         pendingDouble = false
+        // If black was the offerer, continue its turn by rolling
+        if state.currentPlayer == .black { rollDice() }
     }
 
     func dropDouble() {
@@ -333,7 +349,7 @@ final class GameViewModel {
         if winner == .white { whiteScore += pts } else { blackScore += pts }
         scoreRecorded = true
         droppedWinner = winner   // allows rematch, unlike resignedWinner
-        pendingDouble = false; pendingRoll = false
+        pendingDouble = false; pendingRoll = false; cubeResponseMessage = nil
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
     }
@@ -357,13 +373,20 @@ final class GameViewModel {
             endTurn()
             return
         }
-        guard let d = dice, !d.isDone else { pendingEndTurn = true; return }
+        guard let d = dice, !d.isDone else {
+            if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
+            return
+        }
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
         if allLegalMoves.isEmpty { noMovesAvailable = true; scheduleAutoEnd(); return }
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
         }
-        scheduleAutoPlay(delay: 900)
+        if state.currentPlayer == .black {
+            scheduleAIPlay(delay: 900)
+        } else {
+            scheduleAutoPlay(delay: 900)
+        }
     }
 
     private func uniqueForcedStep() -> CheckerMove? {
@@ -382,6 +405,55 @@ final class GameViewModel {
             isAutoPlayInProgress = true
             commitMove(to: step.to)
             isAutoPlayInProgress = false
+        }
+    }
+
+    private func scheduleAIPlay(delay: Int) {
+        guard !allLegalMoves.isEmpty else { return }
+        autoPlayTask?.cancel()
+        autoPlayTask = Task {
+            try? await Task.sleep(for: .milliseconds(delay))
+            guard !Task.isCancelled else { return }
+            guard let move = AIPlayer.bestMove(for: state, moves: allLegalMoves, cube: cubeValue, cubeOwner: cubeOwner),
+                  let step = move.first else { return }
+            selectedPoint = step.from
+            isAutoPlayInProgress = true
+            commitMove(to: step.to)
+            isAutoPlayInProgress = false
+        }
+    }
+
+    // Black decides whether to offer a double before rolling.
+    private func scheduleAICubeDecision() {
+        autoPlayTask?.cancel()
+        autoPlayTask = Task {
+            try? await Task.sleep(for: .milliseconds(700))
+            guard !Task.isCancelled else { return }
+            let canOffer = (cubeOwner == nil || cubeOwner == .black) && cubeValue < 64
+            if canOffer,
+               let equity = AIPlayer.rawEquity(for: state, cube: cubeValue, cubeOwner: cubeOwner),
+               equity > 0.5 {
+                pendingDouble = true   // white (human) decides to accept or drop
+            } else {
+                rollDice()
+            }
+        }
+    }
+
+    // Black auto-responds to white's double offer.
+    private func scheduleAICubeResponse() {
+        autoPlayTask?.cancel()
+        autoPlayTask = Task {
+            try? await Task.sleep(for: .milliseconds(1000))
+            guard !Task.isCancelled else { return }
+            let equity = AIPlayer.rawEquity(for: state, cube: cubeValue, cubeOwner: cubeOwner) ?? 0
+            let drops = equity > 0.75
+            pendingDouble = false
+            cubeResponseMessage = drops ? "Denied" : "Accepted"
+            try? await Task.sleep(for: .milliseconds(1500))
+            guard !Task.isCancelled else { return }
+            cubeResponseMessage = nil
+            if drops { dropDouble() } else { acceptDouble() }
         }
     }
 
