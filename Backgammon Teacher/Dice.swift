@@ -15,6 +15,11 @@ struct Dice {
         remaining = values
     }
 
+    init(_ d1: Int, _ d2: Int) {
+        values    = d1 == d2 ? [d1, d1, d1, d1] : [d1, d2]
+        remaining = values
+    }
+
     var isDoubles: Bool { values.count == 4 }
     var isDone: Bool    { remaining.isEmpty }
 
