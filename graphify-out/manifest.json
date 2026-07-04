@@ -1,0 +1,97 @@
+{
+  "Backgammon Teacher/AIPlayer.swift": {
+    "mtime": 1783099722.5055575,
+    "ast_hash": "f938d21d26ccdf53c5b3a10ce7dd8c3e",
+    "semantic_hash": "f938d21d26ccdf53c5b3a10ce7dd8c3e"
+  },
+  "Backgammon Teacher/Assets.xcassets/AccentColor.colorset/Contents.json": {
+    "mtime": 1779559774.2279615,
+    "ast_hash": "55019f7265dde0a78318b0807f98e847",
+    "semantic_hash": "55019f7265dde0a78318b0807f98e847"
+  },
+  "Backgammon Teacher/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1779559775.420472,
+    "ast_hash": "cbe75704b2680422c4156009a528e292",
+    "semantic_hash": "cbe75704b2680422c4156009a528e292"
+  },
+  "Backgammon Teacher/Assets.xcassets/Contents.json": {
+    "mtime": 1779559774.2286866,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Backgammon Teacher/Backgammon_TeacherApp.swift": {
+    "mtime": 1779559774.2241995,
+    "ast_hash": "785ccfc42a78ee11dd0718a93504bdd9",
+    "semantic_hash": "785ccfc42a78ee11dd0718a93504bdd9"
+  },
+  "Backgammon Teacher/BoardEncoder.swift": {
+    "mtime": 1780180089.0719047,
+    "ast_hash": "aead30f76718d855dd9273f568c9df4d",
+    "semantic_hash": "aead30f76718d855dd9273f568c9df4d"
+  },
+  "Backgammon Teacher/BoardState.swift": {
+    "mtime": 1780005749.4034395,
+    "ast_hash": "abe21a68393e75d1a8693b9de651c3e6",
+    "semantic_hash": "abe21a68393e75d1a8693b9de651c3e6"
+  },
+  "Backgammon Teacher/BoardView.swift": {
+    "mtime": 1783100346.7746627,
+    "ast_hash": "833cdc50c3e0690d511e1e419e71d17c",
+    "semantic_hash": "833cdc50c3e0690d511e1e419e71d17c"
+  },
+  "Backgammon Teacher/ContentView.swift": {
+    "mtime": 1780001575.2906058,
+    "ast_hash": "4faf01440a832b8f707018eda3f4e6d8",
+    "semantic_hash": "4faf01440a832b8f707018eda3f4e6d8"
+  },
+  "Backgammon Teacher/Dice.swift": {
+    "mtime": 1780252136.5984757,
+    "ast_hash": "c169328edc1d655138c301930cdd546a",
+    "semantic_hash": "c169328edc1d655138c301930cdd546a"
+  },
+  "Backgammon Teacher/GameViewModel.swift": {
+    "mtime": 1783100295.9393852,
+    "ast_hash": "c0c9f1e549469e7690d658a53e82999d",
+    "semantic_hash": "c0c9f1e549469e7690d658a53e82999d"
+  },
+  "Backgammon Teacher/MoveGenerator.swift": {
+    "mtime": 1779563488.2738142,
+    "ast_hash": "b1412c47e78cf52cd6c642080debedf7",
+    "semantic_hash": "b1412c47e78cf52cd6c642080debedf7"
+  },
+  "TDGammon.mlpackage/Manifest.json": {
+    "mtime": 1780259885.833643,
+    "ast_hash": "0425bcd2da6d504fc5706030d3842ef2",
+    "semantic_hash": "0425bcd2da6d504fc5706030d3842ef2"
+  },
+  "bg_worker.py": {
+    "mtime": 1780261722.8956153,
+    "ast_hash": "1419b443c144b6a27ddaebee9dacf184",
+    "semantic_hash": "1419b443c144b6a27ddaebee9dacf184"
+  },
+  ".claude/settings.local.json": {
+    "mtime": 1782476329.33743,
+    "ast_hash": "0fcc8665e572ab7be3dc76db735a1775",
+    "semantic_hash": "0fcc8665e572ab7be3dc76db735a1775"
+  },
+  "Backgammon Teacher/ExplanationRenderer.swift": {
+    "mtime": 1783099979.4051712,
+    "ast_hash": "c57460e6bd055691882b225f5106837e",
+    "semantic_hash": "c57460e6bd055691882b225f5106837e"
+  },
+  "Backgammon Teacher/MoveExplainer.swift": {
+    "mtime": 1783099758.8866973,
+    "ast_hash": "210b4f37b0cf29151507677bb75b97d8",
+    "semantic_hash": "210b4f37b0cf29151507677bb75b97d8"
+  },
+  "Backgammon Teacher/PositionFeatures.swift": {
+    "mtime": 1783098742.0604315,
+    "ast_hash": "058a2e52894e38db5d23cfc3292210de",
+    "semantic_hash": "058a2e52894e38db5d23cfc3292210de"
+  },
+  "BackgammonTeacherTests/MoveExplainerTests.swift": {
+    "mtime": 1783100010.2252698,
+    "ast_hash": "7134eb2229c0729212aa3355f863223e",
+    "semantic_hash": "7134eb2229c0729212aa3355f863223e"
+  }
+}

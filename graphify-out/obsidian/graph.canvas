@@ -1,0 +1,2773 @@
+{
+  "nodes": [
+    {
+      "id": "g0",
+      "type": "group",
+      "label": "Board Rendering",
+      "x": 0,
+      "y": 0,
+      "width": 1320,
+      "height": 1320,
+      "color": "1"
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_barcheckers",
+      "type": "file",
+      "file": ".barCheckers().md",
+      "x": 20,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_barpanel",
+      "type": "file",
+      "file": ".barPanel().md",
+      "x": 220,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_boardcanvas",
+      "type": "file",
+      "file": ".boardCanvas().md",
+      "x": 420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_boardoverlay",
+      "type": "file",
+      "file": ".boardOverlay().md",
+      "x": 20,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_boreoffsection",
+      "type": "file",
+      "file": ".boreOffSection().md",
+      "x": 220,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_boreofftray",
+      "type": "file",
+      "file": ".boreOffTray().md",
+      "x": 420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pointview_checkerdisc",
+      "type": "file",
+      "file": ".checkerDisc().md",
+      "x": 20,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay_destcenter",
+      "type": "file",
+      "file": ".destCenter().md",
+      "x": 220,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_dicecontent",
+      "type": "file",
+      "file": ".diceContent().md",
+      "x": 420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay_disc",
+      "type": "file",
+      "file": ".disc().md",
+      "x": 20,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_dragdisc",
+      "type": "file",
+      "file": ".dragDisc().md",
+      "x": 220,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_gamebutton",
+      "type": "file",
+      "file": ".gameButton().md",
+      "x": 420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_halfpanel",
+      "type": "file",
+      "file": ".halfPanel().md",
+      "x": 20,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_panelbutton",
+      "type": "file",
+      "file": ".panelButton().md",
+      "x": 220,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_panellabel",
+      "type": "file",
+      "file": ".panelLabel().md",
+      "x": 420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pointview_pointat",
+      "type": "file",
+      "file": ".pointAt().md",
+      "x": 20,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay_ptx",
+      "type": "file",
+      "file": ".ptX().md",
+      "x": 220,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "type": "file",
+      "file": ".setupColorButton().md",
+      "x": 420,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay_sourcecenter",
+      "type": "file",
+      "file": ".sourceCenter().md",
+      "x": 20,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay_stacktopy",
+      "type": "file",
+      "file": ".stackTopY().md",
+      "x": 220,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_boardview",
+      "type": "file",
+      "file": "BoardView.md",
+      "x": 420,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview",
+      "type": "file",
+      "file": "BoardView.swift.md",
+      "x": 20,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cgfloat",
+      "type": "file",
+      "file": "CGFloat.md",
+      "x": 220,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cgpoint",
+      "type": "file",
+      "file": "CGPoint.md",
+      "x": 420,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_checkerflightoverlay",
+      "type": "file",
+      "file": "CheckerFlightOverlay.md",
+      "x": 20,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_color",
+      "type": "file",
+      "file": "Color.md",
+      "x": 220,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_dicefaceview",
+      "type": "file",
+      "file": "DiceFaceView.md",
+      "x": 420,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gesture",
+      "type": "file",
+      "file": "Gesture.md",
+      "x": 20,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_never",
+      "type": "file",
+      "file": "Never.md",
+      "x": 220,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pc",
+      "type": "file",
+      "file": "PC.md",
+      "x": 420,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pointview",
+      "type": "file",
+      "file": "PointView.md",
+      "x": 20,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_settingsview",
+      "type": "file",
+      "file": "SettingsView.md",
+      "x": 220,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_string",
+      "type": "file",
+      "file": "String.md",
+      "x": 420,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_view",
+      "type": "file",
+      "file": "View.md",
+      "x": 20,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_void",
+      "type": "file",
+      "file": "Void.md",
+      "x": 220,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g1",
+      "type": "group",
+      "label": "Game View Model",
+      "x": 1400,
+      "y": 0,
+      "width": 1100,
+      "height": 1020,
+      "color": "2"
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_acceptdouble",
+      "type": "file",
+      "file": ".acceptDouble().md",
+      "x": 1420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_canceldrag",
+      "type": "file",
+      "file": ".cancelDrag().md",
+      "x": 1620,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_cleardragstate",
+      "type": "file",
+      "file": ".clearDragState().md",
+      "x": 1820,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_clearsetupboard",
+      "type": "file",
+      "file": ".clearSetupBoard().md",
+      "x": 1420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_confirmendturn",
+      "type": "file",
+      "file": ".confirmEndTurn().md",
+      "x": 1620,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_dropdouble",
+      "type": "file",
+      "file": ".dropDouble().md",
+      "x": 1820,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_endturn",
+      "type": "file",
+      "file": ".endTurn().md",
+      "x": 1420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_entersetupmode",
+      "type": "file",
+      "file": ".enterSetupMode().md",
+      "x": 1620,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_finishturn",
+      "type": "file",
+      "file": ".finishTurn().md",
+      "x": 1820,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_newgame",
+      "type": "file",
+      "file": ".newGame().md",
+      "x": 1420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_offerdouble",
+      "type": "file",
+      "file": ".offerDouble().md",
+      "x": 1620,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_rematch",
+      "type": "file",
+      "file": ".rematch().md",
+      "x": 1820,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_resign",
+      "type": "file",
+      "file": ".resign().md",
+      "x": 1420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_rolldice",
+      "type": "file",
+      "file": ".rollDice().md",
+      "x": 1620,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicubedecision",
+      "type": "file",
+      "file": ".scheduleAICubeDecision().md",
+      "x": 1820,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicuberesponse",
+      "type": "file",
+      "file": ".scheduleAICubeResponse().md",
+      "x": 1420,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaiplay",
+      "type": "file",
+      "file": ".scheduleAIPlay().md",
+      "x": 1620,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleautoend",
+      "type": "file",
+      "file": ".scheduleAutoEnd().md",
+      "x": 1820,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleautoplay",
+      "type": "file",
+      "file": ".scheduleAutoPlay().md",
+      "x": 1420,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_startfromsetup",
+      "type": "file",
+      "file": ".startFromSetup().md",
+      "x": 1620,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_startturn",
+      "type": "file",
+      "file": ".startTurn().md",
+      "x": 1820,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_uniqueforcedstep",
+      "type": "file",
+      "file": ".uniqueForcedStep().md",
+      "x": 1420,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "type": "file",
+      "file": "GameViewModel.md",
+      "x": 1620,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_set",
+      "type": "file",
+      "file": "Set.md",
+      "x": 1820,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_task",
+      "type": "file",
+      "file": "Task.md",
+      "x": 1420,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g2",
+      "type": "group",
+      "label": "Python Move Engine",
+      "x": 2580,
+      "y": 0,
+      "width": 1100,
+      "height": 920,
+      "color": "3"
+    },
+    {
+      "id": "n_bg_worker_workernet_init",
+      "type": "file",
+      "file": ".__init__().md",
+      "x": 2600,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_workernet_forward",
+      "type": "file",
+      "file": ".forward().md",
+      "x": 2800,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_workernet",
+      "type": "file",
+      "file": "_WorkerNet.md",
+      "x": 3000,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_apply_step",
+      "type": "file",
+      "file": "_apply_step().md",
+      "x": 2600,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_bear_off_ok_black",
+      "type": "file",
+      "file": "_bear_off_ok_black().md",
+      "x": 2800,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_bear_off_ok_white",
+      "type": "file",
+      "file": "_bear_off_ok_white().md",
+      "x": 3000,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_can_bear_off_black",
+      "type": "file",
+      "file": "_can_bear_off_black().md",
+      "x": 2600,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_can_bear_off_white",
+      "type": "file",
+      "file": "_can_bear_off_white().md",
+      "x": 2800,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_choose_1ply_cpu",
+      "type": "file",
+      "file": "_choose_1ply_cpu().md",
+      "x": 3000,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_gen",
+      "type": "file",
+      "file": "_gen().md",
+      "x": 2600,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_play_games",
+      "type": "file",
+      "file": "_play_games().md",
+      "x": 2800,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_singles",
+      "type": "file",
+      "file": "_singles().md",
+      "x": 3000,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_apply_move",
+      "type": "file",
+      "file": "apply_move().md",
+      "x": 2600,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker",
+      "type": "file",
+      "file": "bg_worker.py.md",
+      "x": 2800,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_encode_board",
+      "type": "file",
+      "file": "encode_board().md",
+      "x": 3000,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_flip_board",
+      "type": "file",
+      "file": "flip_board().md",
+      "x": 2600,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_game_outcome",
+      "type": "file",
+      "file": "game_outcome().md",
+      "x": 2800,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_generate_legal_moves",
+      "type": "file",
+      "file": "generate_legal_moves().md",
+      "x": 3000,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_initial_board",
+      "type": "file",
+      "file": "initial_board().md",
+      "x": 2600,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_outcome_target",
+      "type": "file",
+      "file": "outcome_target().md",
+      "x": 2800,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_roll_dice",
+      "type": "file",
+      "file": "roll_dice().md",
+      "x": 3000,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bg_worker_worker_fn",
+      "type": "file",
+      "file": "worker_fn().md",
+      "x": 2600,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g3",
+      "type": "group",
+      "label": "App Entry & UI Shell",
+      "x": 3760,
+      "y": 0,
+      "width": 1100,
+      "height": 820,
+      "color": "4"
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_flightinfo_init",
+      "type": "file",
+      "file": ".init()_1.md",
+      "x": 3780,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pointtriangle_path",
+      "type": "file",
+      "file": ".path().md",
+      "x": 3980,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_app",
+      "type": "file",
+      "file": "App.md",
+      "x": 4180,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp",
+      "type": "file",
+      "file": "Backgammon_TeacherApp.md",
+      "x": 3780,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_backgammon_teacherapp",
+      "type": "file",
+      "file": "Backgammon_TeacherApp.swift.md",
+      "x": 3980,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bool",
+      "type": "file",
+      "file": "Bool.md",
+      "x": 4180,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cgrect",
+      "type": "file",
+      "file": "CGRect.md",
+      "x": 3780,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_contentview_contentview",
+      "type": "file",
+      "file": "ContentView.md",
+      "x": 3980,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_contentview",
+      "type": "file",
+      "file": "ContentView.swift.md",
+      "x": 4180,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_equatable",
+      "type": "file",
+      "file": "Equatable.md",
+      "x": 3780,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_flightinfo",
+      "type": "file",
+      "file": "FlightInfo.md",
+      "x": 3980,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel",
+      "type": "file",
+      "file": "GameViewModel.swift.md",
+      "x": 4180,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_path",
+      "type": "file",
+      "file": "Path.md",
+      "x": 3780,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardview_pointtriangle",
+      "type": "file",
+      "file": "PointTriangle.md",
+      "x": 3980,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scene",
+      "type": "file",
+      "file": "Scene.md",
+      "x": 4180,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_self",
+      "type": "file",
+      "file": "Self.md",
+      "x": 3780,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_shape",
+      "type": "file",
+      "file": "Shape.md",
+      "x": 3980,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_swiftui",
+      "type": "file",
+      "file": "SwiftUI.md",
+      "x": 4180,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_uuid",
+      "type": "file",
+      "file": "UUID.md",
+      "x": 3780,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g4",
+      "type": "group",
+      "label": "Board State Logic",
+      "x": 0,
+      "y": 1400,
+      "width": 880,
+      "height": 620,
+      "color": "5"
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "type": "file",
+      "file": ".barCount().md",
+      "x": 20,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "type": "file",
+      "file": ".canBearOff().md",
+      "x": 220,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "type": "file",
+      "file": ".checkerCount().md",
+      "x": 420,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_movegenerator_generate",
+      "type": "file",
+      "file": ".generate().md",
+      "x": 20,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "type": "file",
+      "file": ".isBearOffLegal().md",
+      "x": 220,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "type": "file",
+      "file": ".legalMoves().md",
+      "x": 420,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_makeempty",
+      "type": "file",
+      "file": ".makeEmpty().md",
+      "x": 20,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_makeinitial",
+      "type": "file",
+      "file": ".makeInitial().md",
+      "x": 220,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_score",
+      "type": "file",
+      "file": ".score().md",
+      "x": 420,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "type": "file",
+      "file": ".singleMoves().md",
+      "x": 20,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_undostep",
+      "type": "file",
+      "file": ".undoStep().md",
+      "x": 220,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate",
+      "type": "file",
+      "file": "BoardState.md",
+      "x": 420,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_move",
+      "type": "file",
+      "file": "Move.md",
+      "x": 20,
+      "y": 1800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_movegenerator",
+      "type": "file",
+      "file": "MoveGenerator.md",
+      "x": 220,
+      "y": 1800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g5",
+      "type": "group",
+      "label": "ML Package Manifest",
+      "x": 1400,
+      "y": 1400,
+      "width": 880,
+      "height": 620,
+      "color": "6"
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_iteminfoentries_0cd34d8f_5872_482c_a624_7cf204045826",
+      "type": "file",
+      "file": "0CD34D8F-5872-482C-A624-7CF204045826.md",
+      "x": 1420,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_iteminfoentries_689e09f4_91cf_4a35_ab76_0b2168722650",
+      "type": "file",
+      "file": "689E09F4-91CF-4A35-AB76-0B2168722650.md",
+      "x": 1620,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest",
+      "type": "file",
+      "file": "Manifest.json.md",
+      "x": 1820,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_0cd34d8f_5872_482c_a624_7cf204045826_author",
+      "type": "file",
+      "file": "author.md",
+      "x": 1420,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_689e09f4_91cf_4a35_ab76_0b2168722650_author",
+      "type": "file",
+      "file": "author_1.md",
+      "x": 1620,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_0cd34d8f_5872_482c_a624_7cf204045826_description",
+      "type": "file",
+      "file": "description.md",
+      "x": 1820,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_689e09f4_91cf_4a35_ab76_0b2168722650_description",
+      "type": "file",
+      "file": "description_1.md",
+      "x": 1420,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_fileformatversion",
+      "type": "file",
+      "file": "fileFormatVersion.md",
+      "x": 1620,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_iteminfoentries",
+      "type": "file",
+      "file": "itemInfoEntries.md",
+      "x": 1820,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_0cd34d8f_5872_482c_a624_7cf204045826_name",
+      "type": "file",
+      "file": "name.md",
+      "x": 1420,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_689e09f4_91cf_4a35_ab76_0b2168722650_name",
+      "type": "file",
+      "file": "name_1.md",
+      "x": 1620,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_0cd34d8f_5872_482c_a624_7cf204045826_path",
+      "type": "file",
+      "file": "path.md",
+      "x": 1820,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_689e09f4_91cf_4a35_ab76_0b2168722650_path",
+      "type": "file",
+      "file": "path_1.md",
+      "x": 1420,
+      "y": 1800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon_mlpackage_manifest_rootmodelidentifier",
+      "type": "file",
+      "file": "rootModelIdentifier.md",
+      "x": 1620,
+      "y": 1800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g6",
+      "type": "group",
+      "label": "Dice & Move Application",
+      "x": 2580,
+      "y": 1400,
+      "width": 880,
+      "height": 520,
+      "color": "1"
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_applystep",
+      "type": "file",
+      "file": ".applyStep().md",
+      "x": 2600,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_applying",
+      "type": "file",
+      "file": ".applying().md",
+      "x": 2800,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_commitmove",
+      "type": "file",
+      "file": ".commitMove().md",
+      "x": 3000,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_drop",
+      "type": "file",
+      "file": ".drop().md",
+      "x": 2600,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_dice_dice_init",
+      "type": "file",
+      "file": ".init().md",
+      "x": 2800,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_dice_dice_markused",
+      "type": "file",
+      "file": ".markUsed().md",
+      "x": 3000,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tap",
+      "type": "file",
+      "file": ".tap().md",
+      "x": 2600,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tapsetup",
+      "type": "file",
+      "file": ".tapSetup().md",
+      "x": 2800,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator_checkermove",
+      "type": "file",
+      "file": "CheckerMove.md",
+      "x": 3000,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_dice_dice",
+      "type": "file",
+      "file": "Dice.md",
+      "x": 2600,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_hashable",
+      "type": "file",
+      "file": "Hashable.md",
+      "x": 2800,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_int",
+      "type": "file",
+      "file": "Int.md",
+      "x": 3000,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g7",
+      "type": "group",
+      "label": "AI & Encoding Bridge",
+      "x": 3760,
+      "y": 1400,
+      "width": 880,
+      "height": 520,
+      "color": "2"
+    },
+    {
+      "id": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "type": "file",
+      "file": ".encode().md",
+      "x": 3780,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardencoder_boardencoder_flip",
+      "type": "file",
+      "file": ".flip().md",
+      "x": 3980,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer",
+      "type": "file",
+      "file": "AIPlayer.swift.md",
+      "x": 4180,
+      "y": 1480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardencoder_boardencoder",
+      "type": "file",
+      "file": "BoardEncoder.md",
+      "x": 3780,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardencoder",
+      "type": "file",
+      "file": "BoardEncoder.swift.md",
+      "x": 3980,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate",
+      "type": "file",
+      "file": "BoardState.swift.md",
+      "x": 4180,
+      "y": 1560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_coreml",
+      "type": "file",
+      "file": "CoreML.md",
+      "x": 3780,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_dice",
+      "type": "file",
+      "file": "Dice.swift.md",
+      "x": 3980,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_foundation",
+      "type": "file",
+      "file": "Foundation.md",
+      "x": 4180,
+      "y": 1640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_movegenerator",
+      "type": "file",
+      "file": "MoveGenerator.swift.md",
+      "x": 3780,
+      "y": 1720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g8",
+      "type": "group",
+      "label": "TD-Gammon Equity Eval",
+      "x": 0,
+      "y": 2100,
+      "width": 660,
+      "height": 420,
+      "color": "3"
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "type": "file",
+      "file": ".best1Ply().md",
+      "x": 20,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "type": "file",
+      "file": ".bestMove().md",
+      "x": 220,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "type": "file",
+      "file": ".evalEquity().md",
+      "x": 420,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "type": "file",
+      "file": ".rawEquity().md",
+      "x": 20,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_aiplayer_aiplayer",
+      "type": "file",
+      "file": "AIPlayer.md",
+      "x": 220,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_float",
+      "type": "file",
+      "file": "Float.md",
+      "x": 420,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tdgammon",
+      "type": "file",
+      "file": "TDGammon.md",
+      "x": 20,
+      "y": 2340,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g9",
+      "type": "group",
+      "label": "Player & Range Rules",
+      "x": 1400,
+      "y": 2100,
+      "width": 660,
+      "height": 400,
+      "color": "4"
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_boardstate_isblocked",
+      "type": "file",
+      "file": ".isBlocked().md",
+      "x": 1420,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_closedrange",
+      "type": "file",
+      "file": "ClosedRange.md",
+      "x": 1620,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_player",
+      "type": "file",
+      "file": "Player.md",
+      "x": 1820,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_player_black",
+      "type": "file",
+      "file": "black.md",
+      "x": 1420,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_backgammon_teacher_boardstate_player_white",
+      "type": "file",
+      "file": "white.md",
+      "x": 1620,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_backgammon_teacher_aiplayer_backgammon_teacher_aiplayer_aiplayer",
+      "fromNode": "n_backgammon_teacher_aiplayer",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_coreml",
+      "fromNode": "n_backgammon_teacher_aiplayer",
+      "toNode": "n_coreml",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_foundation",
+      "fromNode": "n_backgammon_teacher_aiplayer",
+      "toNode": "n_foundation",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_foundation_backgammon_teacher_boardencoder",
+      "fromNode": "n_foundation",
+      "toNode": "n_backgammon_teacher_boardencoder",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_foundation_backgammon_teacher_boardstate",
+      "fromNode": "n_foundation",
+      "toNode": "n_backgammon_teacher_boardstate",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_foundation_backgammon_teacher_dice",
+      "fromNode": "n_foundation",
+      "toNode": "n_backgammon_teacher_dice",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_foundation_backgammon_teacher_movegenerator",
+      "fromNode": "n_foundation",
+      "toNode": "n_backgammon_teacher_movegenerator",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_int",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_int",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_tdgammon",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer",
+      "toNode": "n_tdgammon",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardencoder_boardencoder_encode",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardencoder_boardencoder_flip",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_flip",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_boardstate_barcount",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_boardstate_checkercount",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_boardstate_isblocked",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_isblocked",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_boardstate_score",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_score",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardstate_player",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_boardview",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_boardview",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_boardview_dicecontent",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dicecontent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_boardview_halfpanel",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_boardview_halfpanel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_checkerflightoverlay_ptx",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay_ptx",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_checkerflightoverlay_stacktopy",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay_stacktopy",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_dicefaceview",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_dicefaceview",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_pointview",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_pointview",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_boardview_pointview_pointat",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_boardview_pointview_pointat",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_dice_dice",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_dice_dice",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_dice_dice_init",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_dice_dice_init",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_dice_dice_markused",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_dice_dice_markused",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_flightinfo",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_flightinfo",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_flightinfo_init",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_flightinfo_init",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_commitmove",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_commitmove",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_drop",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_drop",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaiplay",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaiplay",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleautoplay",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleautoplay",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_tap",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tap",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_gameviewmodel_gameviewmodel_tapsetup",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tapsetup",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_movegenerator_checkermove",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_movegenerator_checkermove",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_movegenerator_movegenerator_generate",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_generate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_int_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "fromNode": "n_int",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_boardencoder_boardencoder_encode",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_float",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_float",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_evalequity_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_evalequity",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_float_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "fromNode": "n_float",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_float_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_float",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_float_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "fromNode": "n_float",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_float_backgammon_teacher_boardencoder_boardencoder_encode",
+      "fromNode": "n_float",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_best1ply_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_best1ply_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_best1ply_move",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "toNode": "n_move",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_best1ply_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_best1ply",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_move_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "fromNode": "n_move",
+      "toNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_move_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_move",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_move_backgammon_teacher_movegenerator_movegenerator_generate",
+      "fromNode": "n_move",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_generate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_move_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "fromNode": "n_move",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_bestmove_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_bestmove_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_bestmove_backgammon_teacher_dice_dice",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "toNode": "n_backgammon_teacher_dice_dice",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_bestmove_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_bestmove_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaiplay",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_bestmove",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaiplay",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_rawequity_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_rawequity_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_rawequity_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicubedecision",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicubedecision",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_aiplayer_aiplayer_rawequity_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicuberesponse",
+      "fromNode": "n_backgammon_teacher_aiplayer_aiplayer_rawequity",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_scheduleaicuberesponse",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_backgammon_teacherapp_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp",
+      "fromNode": "n_backgammon_teacher_backgammon_teacherapp",
+      "toNode": "n_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_backgammon_teacherapp_swiftui",
+      "fromNode": "n_backgammon_teacher_backgammon_teacherapp",
+      "toNode": "n_swiftui",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_swiftui_backgammon_teacher_boardview",
+      "fromNode": "n_swiftui",
+      "toNode": "n_backgammon_teacher_boardview",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_swiftui_backgammon_teacher_contentview",
+      "fromNode": "n_swiftui",
+      "toNode": "n_backgammon_teacher_contentview",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_swiftui_backgammon_teacher_gameviewmodel",
+      "fromNode": "n_swiftui",
+      "toNode": "n_backgammon_teacher_gameviewmodel",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp_app",
+      "fromNode": "n_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp",
+      "toNode": "n_app",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp_scene",
+      "fromNode": "n_backgammon_teacher_backgammon_teacherapp_backgammon_teacherapp",
+      "toNode": "n_scene",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_backgammon_teacher_boardencoder_boardencoder",
+      "fromNode": "n_backgammon_teacher_boardencoder",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_boardencoder_backgammon_teacher_boardencoder_boardencoder_encode",
+      "fromNode": "n_backgammon_teacher_boardencoder_boardencoder",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_boardencoder_backgammon_teacher_boardencoder_boardencoder_flip",
+      "fromNode": "n_backgammon_teacher_boardencoder_boardencoder",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_flip",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_boardencoder_encode_backgammon_teacher_boardencoder_boardencoder_flip",
+      "fromNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "toNode": "n_backgammon_teacher_boardencoder_boardencoder_flip",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_boardencoder_encode_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardencoder_boardencoder_encode_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_boardencoder_boardencoder_encode",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_backgammon_teacher_boardstate_player",
+      "fromNode": "n_backgammon_teacher_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_player",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_boardstate_barcount",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_boardstate_checkercount",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_boardstate_isblocked",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_isblocked",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_player_black",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_player_black",
+      "label": "case_of [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardstate_player_white",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardstate_player_white",
+      "label": "case_of [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_closedrange",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_closedrange",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_hashable",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_hashable",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardview_boardview_barcheckers",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardview_boardview_barcheckers",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardview_boardview_boreoffsection",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boreoffsection",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_gameviewmodel_gameviewmodel_startfromsetup",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_startfromsetup",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_player_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "fromNode": "n_backgammon_teacher_boardstate_player",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_hashable_backgammon_teacher_boardstate_boardstate",
+      "fromNode": "n_hashable",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_hashable_backgammon_teacher_movegenerator_checkermove",
+      "fromNode": "n_hashable",
+      "toNode": "n_backgammon_teacher_movegenerator_checkermove",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_applying",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_applying",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_barcount",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_checkercount",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_isblocked",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_isblocked",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_makeempty",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_makeempty",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_makeinitial",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_makeinitial",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_boardstate_boardstate_score",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_score",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_string",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_string",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_gameviewmodel_gameviewmodel_commitmove",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_commitmove",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_gameviewmodel_gameviewmodel_tapsetup",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tapsetup",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_gameviewmodel_gameviewmodel_undostep",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_undostep",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_movegenerator_movegenerator_generate",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_generate",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_legalmoves",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_checkercount_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_checkercount_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_checkercount",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_gameviewmodel_gameviewmodel_canceldrag",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_canceldrag",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_gameviewmodel_gameviewmodel_finishturn",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_finishturn",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_gameviewmodel_gameviewmodel_rolldice",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_rolldice",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_gameviewmodel_gameviewmodel_tap",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_tap",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_gameviewmodel_gameviewmodel_undostep",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_undostep",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_barcount_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_barcount",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_isblocked_bool",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_isblocked",
+      "toNode": "n_bool",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardstate_boardstate_score",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardstate_boardstate_score",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardview_boardview_dragdisc",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dragdisc",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardview_checkerflightoverlay_disc",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay_disc",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardview_pointtriangle",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardview_pointtriangle",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardview_pointview",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardview_pointview",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_boardview_pointview_checkerdisc",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_boardview_pointview_checkerdisc",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_dice_dice",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_dice_dice",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_gameviewmodel_flightinfo",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_gameviewmodel_flightinfo",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_gameviewmodel_flightinfo_init",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_gameviewmodel_flightinfo_init",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_bool_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "fromNode": "n_bool",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_isbearofflegal",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_canbearoff_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_canbearoff",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_singlemoves",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_score_backgammon_teacher_gameviewmodel_gameviewmodel_finishturn",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_score",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_finishturn",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_string_backgammon_teacher_boardview_boardview_gamebutton",
+      "fromNode": "n_string",
+      "toNode": "n_backgammon_teacher_boardview_boardview_gamebutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_string_backgammon_teacher_boardview_boardview_panelbutton",
+      "fromNode": "n_string",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panelbutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_string_backgammon_teacher_boardview_boardview_panellabel",
+      "fromNode": "n_string",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panellabel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_string_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "fromNode": "n_string",
+      "toNode": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_string_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "fromNode": "n_string",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_applying_backgammon_teacher_movegenerator_checkermove",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_applying",
+      "toNode": "n_backgammon_teacher_movegenerator_checkermove",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_applying_backgammon_teacher_gameviewmodel_gameviewmodel_applystep",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_applying",
+      "toNode": "n_backgammon_teacher_gameviewmodel_gameviewmodel_applystep",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardstate_boardstate_applying_backgammon_teacher_movegenerator_movegenerator_generate",
+      "fromNode": "n_backgammon_teacher_boardstate_boardstate_applying",
+      "toNode": "n_backgammon_teacher_movegenerator_movegenerator_generate",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_boardview",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_checkerflightoverlay",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_dicefaceview",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_dicefaceview",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_pc",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_pc",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_pointtriangle",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_pointtriangle",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_pointview",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_pointview",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_backgammon_teacher_boardview_settingsview",
+      "fromNode": "n_backgammon_teacher_boardview",
+      "toNode": "n_backgammon_teacher_boardview_settingsview",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_pc_backgammon_teacher_boardview_boardview_boardoverlay",
+      "fromNode": "n_backgammon_teacher_boardview_pc",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boardoverlay",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_pc_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "fromNode": "n_backgammon_teacher_boardview_pc",
+      "toNode": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_pc_color",
+      "fromNode": "n_backgammon_teacher_boardview_pc",
+      "toNode": "n_color",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_barcheckers",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_barcheckers",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_barpanel",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_barpanel",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_boardcanvas",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boardcanvas",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_boardoverlay",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boardoverlay",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_boreoffsection",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boreoffsection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_boreofftray",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boreofftray",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_dicecontent",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dicecontent",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_dragdisc",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dragdisc",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_gamebutton",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_gamebutton",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_halfpanel",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_halfpanel",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_panelbutton",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panelbutton",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_panellabel",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panellabel",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_never",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_never",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_task",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_task",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_view",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_view",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backgammon_teacher_boardview_boardview_void",
+      "fromNode": "n_backgammon_teacher_boardview_boardview",
+      "toNode": "n_void",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_barcheckers",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_barcheckers",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_barpanel",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_barpanel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_boardcanvas",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boardcanvas",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_boardoverlay",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boardoverlay",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_boreoffsection",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boreoffsection",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_boreofftray",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_boreofftray",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_dicecontent",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dicecontent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_dragdisc",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_dragdisc",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_gamebutton",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_gamebutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_halfpanel",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_halfpanel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_panelbutton",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panelbutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_panellabel",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_panellabel",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_boardview_setupcolorbutton",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_checkerflightoverlay",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_checkerflightoverlay_disc",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_checkerflightoverlay_disc",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_view_backgammon_teacher_boardview_dicefaceview",
+      "fromNode": "n_view",
+      "toNode": "n_backgammon_teacher_boardview_dicefaceview",
+      "label": "references [EXTRACTED]"
+    }
+  ]
+}

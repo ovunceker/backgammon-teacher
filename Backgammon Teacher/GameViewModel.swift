@@ -36,6 +36,8 @@ final class GameViewModel {
     private var autoEndTask: Task<Void, Never>?
     private var autoPlayTask: Task<Void, Never>?
     private var isAutoPlayInProgress: Bool = false
+    private(set) var lastAnalysis: MoveAnalysis? = nil
+    private var analysisTask: Task<Void, Never>? = nil
 
     // MARK: Settings
     var advancedMode: Bool = UserDefaults.standard.bool(forKey: "advancedMode") {
@@ -44,6 +46,10 @@ final class GameViewModel {
             // Toggling advanced off while waiting to roll → auto-roll so game isn't stuck
             if !advancedMode && pendingRoll && !pendingDouble { rollDice() }
         }
+    }
+
+    var coachMode: Bool = UserDefaults.standard.bool(forKey: "coachMode") {
+        didSet { UserDefaults.standard.set(coachMode, forKey: "coachMode") }
     }
 
     // MARK: Doubling cube + turn-start gate (active only when advancedMode is on)
@@ -267,6 +273,7 @@ final class GameViewModel {
     func newGame() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         whiteScore = 0; blackScore = 0; scoreRecorded = false
@@ -280,6 +287,7 @@ final class GameViewModel {
     func rematch() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         scoreRecorded = false
@@ -293,6 +301,7 @@ final class GameViewModel {
     func enterSetupMode() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         flightInfo = nil
@@ -321,6 +330,7 @@ final class GameViewModel {
     func startFromSetup(as player: Player) {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         state.currentPlayer = player
         isSetupMode = false
@@ -344,6 +354,7 @@ final class GameViewModel {
     }
 
     func dropDouble() {
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         let winner = state.currentPlayer  // offerer wins when opponent drops
         let pts = cubeValue
         if winner == .white { whiteScore += pts } else { blackScore += pts }
@@ -357,13 +368,31 @@ final class GameViewModel {
     func resign() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; pendingRoll = false
         resignedWinner = state.currentPlayer.opponent
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
-    func confirmEndTurn() { endTurn() }
+    func confirmEndTurn() {
+        analysisTask?.cancel()
+        analysisTask = nil
+        if coachMode, let (preTurnState, preTurnDice) = history.first, state.winner == nil {
+            let playerFinal = state
+            lastAnalysis = nil
+            analysisTask = Task.detached(priority: .userInitiated) { [weak self] in
+                let result = MoveExplainer.analyze(
+                    preTurnState: preTurnState,
+                    dice: preTurnDice,
+                    playerFinalState: playerFinal
+                )
+                guard !Task.isCancelled else { return }
+                await MainActor.run { [weak self] in self?.lastAnalysis = result }
+            }
+        }
+        endTurn()
+    }
 
     private func finishTurn() {
         if let w = state.winner, !scoreRecorded {

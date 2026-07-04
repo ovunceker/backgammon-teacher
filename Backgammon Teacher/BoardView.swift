@@ -24,6 +24,8 @@ struct BoardView: View {
     @State private var diceRolling = false
     @State private var diceAnimTask: Task<Void, Never>?
     @State private var showSettings = false
+    @State private var showExplanation = false
+    @State private var explanationAnalysis: MoveAnalysis? = nil
 
     var body: some View {
         ZStack {
@@ -65,6 +67,9 @@ struct BoardView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView().environment(vm)
+        }
+        .sheet(isPresented: $showExplanation) {
+            if let a = explanationAnalysis { ExplanationSheet(analysis: a) }
         }
         .onChange(of: vm.diceRollID) { _, _ in
             guard let dice = vm.dice else { return }
@@ -401,6 +406,9 @@ struct BoardView: View {
     @ViewBuilder
     private var controlPanel: some View {
         VStack(spacing: 11) {
+            if vm.coachMode, let analysis = vm.lastAnalysis {
+                analysisBanner(analysis: analysis)
+            }
             if vm.isSetupMode {
                 panelLabel("BOARD SETUP")
                 HStack(spacing: 6) {
@@ -513,6 +521,41 @@ struct BoardView: View {
         .shadow(color: .black.opacity(0.28), radius: 2, x: 0, y: 1)
     }
 
+    @ViewBuilder
+    private func analysisBanner(analysis: MoveAnalysis) -> some View {
+        let rendered = ExplanationRenderer.render(analysis)
+        let tint = severityColor(analysis.severity)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top, spacing: 6) {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 7, height: 7)
+                    .padding(.top, 4)
+                Text(rendered.headline)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PC.cream)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if analysis.severity != .fine && !rendered.details.isEmpty {
+                Button("EXPLAIN WHY?") {
+                    explanationAnalysis = analysis
+                    showExplanation = true
+                }
+                .font(.system(size: 10, weight: .black, design: .rounded))
+                .foregroundStyle(tint)
+                .kerning(1)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.black.opacity(0.30))
+                .overlay(RoundedRectangle(cornerRadius: 8)
+                    .stroke(tint.opacity(0.40), lineWidth: 1))
+        )
+    }
+
     private func setupColorButton(_ color: Player, label: String) -> some View {
         let isSelected = vm.setupColor == color
         let isWhite    = color == .white
@@ -529,6 +572,92 @@ struct BoardView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(isSelected ? PC.cream.opacity(0.65) : Color.clear, lineWidth: 1.5)
             )
+    }
+}
+
+// MARK: - Severity colour
+
+private func severityColor(_ severity: ErrorSeverity) -> Color {
+    switch severity {
+    case .fine:       return Color(red: 0.20, green: 0.70, blue: 0.25)
+    case .inaccuracy: return Color(red: 0.95, green: 0.80, blue: 0.10)
+    case .error:      return Color(red: 0.90, green: 0.45, blue: 0.10)
+    case .blunder:    return Color(red: 0.75, green: 0.10, blue: 0.10)
+    }
+}
+
+// MARK: - Explanation sheet
+
+private struct ExplanationSheet: View {
+    let analysis: MoveAnalysis
+    @Environment(\.dismiss) private var dismiss
+
+    private var rendered: RenderedExplanation { ExplanationRenderer.render(analysis) }
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.12, green: 0.07, blue: 0.02).ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 10) {
+                    Image(systemName: severitySymbol(analysis.severity))
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(severityColor(analysis.severity))
+                    Text("COACH FEEDBACK")
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .foregroundStyle(PC.cream)
+                        .kerning(2)
+                    Spacer()
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(PC.dim)
+                    }
+                }
+                .padding(.bottom, 16)
+
+                Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
+                    .padding(.bottom, 16)
+
+                Text(rendered.headline)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundStyle(PC.cream)
+                    .padding(.bottom, 14)
+
+                if !rendered.details.isEmpty {
+                    Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
+                        .padding(.bottom, 12)
+                    ForEach(rendered.details.indices, id: \.self) { i in
+                        HStack(alignment: .top, spacing: 10) {
+                            Circle()
+                                .fill(PC.dim)
+                                .frame(width: 5, height: 5)
+                                .padding(.top, 6)
+                            Text(rendered.details[i])
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundStyle(PC.cream.opacity(0.85))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.bottom, 8)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(24)
+        }
+        .presentationDetents([.medium])
+        .presentationBackground(Color(red: 0.12, green: 0.07, blue: 0.02))
+        .presentationCornerRadius(16)
+        .preferredColorScheme(.dark)
+    }
+
+    private func severitySymbol(_ severity: ErrorSeverity) -> String {
+        switch severity {
+        case .fine:       return "checkmark.circle.fill"
+        case .inaccuracy: return "exclamationmark.circle"
+        case .error:      return "exclamationmark.triangle"
+        case .blunder:    return "xmark.octagon.fill"
+        }
     }
 }
 
@@ -899,6 +1028,31 @@ private struct SettingsView: View {
                     }
                     Spacer()
                     Toggle("", isOn: $vm.advancedMode)
+                        .tint(PC.green)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                // Coach mode toggle
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("COACH MODE")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("After each turn, shows how the computer evaluates your move and explains mistakes")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.coachMode)
                         .tint(PC.green)
                         .labelsHidden()
                 }

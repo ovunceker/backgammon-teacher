@@ -19,8 +19,13 @@ struct AIPlayer {
         return outcomes
     }()
 
-    // Network equity from `player`'s perspective at the given state (no move applied).
-    private static func evalEquity(state: BoardState, player: Player, cube: Int, cubeOwner: Player?) -> Float? {
+    // Returns equity and raw 6-probability array from `player`'s perspective.
+    static func equityAndProbs(
+        for state: BoardState,
+        player: Player,
+        cube: Int = 1,
+        cubeOwner: Player? = nil
+    ) -> (equity: Float, probs: [Float])? {
         guard let model else { return nil }
         let floats = BoardEncoder.encode(state, player: player, cube: cube, cubeOwner: cubeOwner)
         guard let input = try? MLMultiArray(shape: [1, 200], dataType: .float32) else { return nil }
@@ -28,8 +33,17 @@ struct AIPlayer {
         guard let output = try? model.prediction(x: input).output else { return nil }
         let weights: [Float] = [1, 2, 3, -1, -2, -3]
         var equity: Float = 0
-        for i in 0..<6 { equity += weights[i] * output[i].floatValue }
-        return equity
+        var probs = [Float](repeating: 0, count: 6)
+        for i in 0..<6 {
+            probs[i] = output[i].floatValue
+            equity += weights[i] * probs[i]
+        }
+        return (equity, probs)
+    }
+
+    // Network equity from `player`'s perspective at the given state (no move applied).
+    private static func evalEquity(state: BoardState, player: Player, cube: Int, cubeOwner: Player?) -> Float? {
+        equityAndProbs(for: state, player: player, cube: cube, cubeOwner: cubeOwner)?.equity
     }
 
     // 1-ply: pick the move with the highest equity from `player`'s perspective.
