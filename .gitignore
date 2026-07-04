@@ -26,3 +26,12 @@ DerivedData/
 .claude
 *.md
 graphify-out
+# Training artifacts
+training.log
+smoke.log
+*.pt.tmp
+
+# Model / CoreML backups (local only)
+TDGammon_mlpackage_*_backup/
+tdgammon_*_backup.pt
+tdgammon_broken.pt

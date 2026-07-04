@@ -8,6 +8,9 @@ import torch.nn as nn
 DOUBLE_THRESHOLD = 0.5
 DROP_THRESHOLD   = 0.75
 _W = np.array([1., 2., 3., -1., -2., -3.], dtype=np.float32)
+# Perspective swap: opponent's [win, gwin, bgwin, loss, gloss, bgloss] read from
+# my side. Vectors SWAP (my_vec = u[_SWAP]); only scalar equity negates.
+_SWAP = np.array([3, 4, 5, 0, 1, 2])
 
 
 def initial_board():
@@ -213,17 +216,17 @@ def _choose_1ply_cpu(board, dice, player, net, cube, cube_owner):
     legal_moves = generate_legal_moves(board, dice, player)
     if not legal_moves:
         return None
-    encodings = [encode_board(apply_move(board, m, player), player, cube, cube_owner)
+    opp = "BLACK" if player == "WHITE" else "WHITE"
+    encodings = [encode_board(apply_move(board, m, player), opp, cube, cube_owner)
                  for m in legal_moves]
     batch = torch.tensor(encodings, dtype=torch.float32)
     with torch.no_grad():
-        eqs = (net(batch).numpy() * _W).sum(axis=1)
-    return legal_moves[int(eqs.argmax())]
+        opp_eq = (net(batch).numpy() * _W).sum(axis=1)   # opponent's equity
+    return legal_moves[int(opp_eq.argmin())]             # minimize it
 
 
 def _play_games(net, n_batch):
     experience = []
-    win_target = np.array([1., 0., 0., 0., 0., 0.], dtype=np.float32)
     with torch.no_grad():
         for _ in range(n_batch):
             board      = initial_board()
@@ -234,17 +237,6 @@ def _play_games(net, n_batch):
                 opponent = "BLACK" if player == "WHITE" else "WHITE"
                 enc  = np.array(encode_board(board, player, cube_value, cube_owner), dtype=np.float32)
                 v_np = net(torch.from_numpy(enc)).numpy().copy()
-                can_double = (cube_owner is None or cube_owner == player) and cube_value < 64
-                if can_double:
-                    eq = float(np.dot(v_np, _W))
-                    if eq > DOUBLE_THRESHOLD:
-                        if eq > DROP_THRESHOLD:
-                            experience.append((enc, win_target - v_np))
-                            break
-                        cube_value *= 2
-                        cube_owner  = opponent
-                        enc  = np.array(encode_board(board, player, cube_value, cube_owner), dtype=np.float32)
-                        v_np = net(torch.from_numpy(enc)).numpy().copy()
                 dice = roll_dice()
                 best = _choose_1ply_cpu(board, dice, player, net, cube_value, cube_owner)
                 if best is not None:
@@ -257,7 +249,8 @@ def _play_games(net, n_batch):
                 next_player = opponent
                 next_enc = np.array(encode_board(board, next_player, cube_value, cube_owner), dtype=np.float32)
                 v_new_np = net(torch.from_numpy(next_enc)).numpy().copy()
-                experience.append((enc, -v_new_np - v_np))
+                target = v_new_np[_SWAP]          # opponent's loss probs are my win probs
+                experience.append((enc, target - v_np))
                 player = next_player
     return experience
 
