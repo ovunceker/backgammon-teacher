@@ -21,3 +21,8 @@ DerivedData/
 
 # Swift Package Manager
 .build/
+
+
+.claude
+*.md
+graphify-out
