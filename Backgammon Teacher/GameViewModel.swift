@@ -67,8 +67,49 @@ final class GameViewModel {
     var openingDiceAsFirst: Bool = UserDefaults.standard.bool(forKey: "openingDiceAsFirst") {
         didSet { UserDefaults.standard.set(openingDiceAsFirst, forKey: "openingDiceAsFirst") }
     }
+    var professionalTimerEnabled: Bool = UserDefaults.standard.bool(forKey: "professionalTimerEnabled") {
+        didSet { UserDefaults.standard.set(professionalTimerEnabled, forKey: "professionalTimerEnabled") }
+    }
+    var regularTimerEnabled: Bool = UserDefaults.standard.bool(forKey: "regularTimerEnabled") {
+        didSet { UserDefaults.standard.set(regularTimerEnabled, forKey: "regularTimerEnabled") }
+    }
     var vurKacViolation = false
     private var pendingOpeningDice: (Int, Int)? = nil
+
+    // MARK: Professional timer
+    private(set) var whiteGameSeconds: Int = 600   // 10 min reserve
+    private(set) var blackGameSeconds: Int = 600
+    private(set) var turnElapsedSeconds: Int = 0
+    private var timerTask: Task<Void, Never>? = nil
+
+    func startTurnTimer() {
+        guard professionalTimerEnabled || regularTimerEnabled else { return }
+        stopTurnTimer()
+        turnElapsedSeconds = 0
+        timerTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(1000))
+                guard !Task.isCancelled else { break }
+                turnElapsedSeconds += 1
+                if professionalTimerEnabled && turnElapsedSeconds > 12 {
+                    if state.currentPlayer == .white {
+                        whiteGameSeconds = max(0, whiteGameSeconds - 1)
+                    } else {
+                        blackGameSeconds = max(0, blackGameSeconds - 1)
+                    }
+                }
+                if regularTimerEnabled && turnElapsedSeconds >= 12 {
+                    resign()
+                    break
+                }
+            }
+        }
+    }
+
+    func stopTurnTimer() {
+        timerTask?.cancel()
+        timerTask = nil
+    }
 
     // MARK: Doubling cube + turn-start gate (active only when advancedMode is on)
     private(set) var cubeValue: Int = 1
@@ -213,6 +254,7 @@ final class GameViewModel {
         } else {
             scheduleAutoPlay(delay: 1500)
         }
+        startTurnTimer()
     }
 
     func tap(point: Int) {
@@ -336,6 +378,7 @@ final class GameViewModel {
     func newGame() {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        stopTurnTimer(); whiteGameSeconds = 600; blackGameSeconds = 600; turnElapsedSeconds = 0
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         whiteScore = 0; blackScore = 0; scoreRecorded = false
@@ -349,6 +392,7 @@ final class GameViewModel {
     func rematch() {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        stopTurnTimer(); whiteGameSeconds = 600; blackGameSeconds = 600; turnElapsedSeconds = 0
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         scoreRecorded = false
@@ -442,6 +486,7 @@ final class GameViewModel {
     }
 
     func dropDouble() {
+        stopTurnTimer()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         let winner = state.currentPlayer  // offerer wins when opponent drops
         let pts = cubeValue
@@ -454,16 +499,21 @@ final class GameViewModel {
     }
 
     func resign() {
+        stopTurnTimer()
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; pendingRoll = false
-        resignedWinner = state.currentPlayer.opponent
+        let winner = state.currentPlayer.opponent
+        if winner == .white { whiteScore += cubeValue } else { blackScore += cubeValue }
+        scoreRecorded = true
+        resignedWinner = winner
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; moveHistory = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
     func confirmEndTurn() {
+        stopTurnTimer()
         if vurKacRuleEnabled, state.currentPlayer == .white,
            let (preTurnState, preTurnDice) = history.first {
             let violation = (1...6).contains(where: { p in

@@ -43,7 +43,7 @@ struct BoardView: View {
             Color(red: 0.10, green: 0.06, blue: 0.02).ignoresSafeArea()
             GeometryReader { geo in
                 // Landscape: board fills the height; controls live in a right-side panel.
-                let leftW:  CGFloat = 0    // left panel — Settings button + future controls
+                let leftW:  CGFloat = 0
                 let panelW: CGFloat = 148
                 let pad:    CGFloat = 8
                 let boardH  = geo.size.height - pad * 2
@@ -54,7 +54,7 @@ struct BoardView: View {
                 let cSz     = min(ptW * 0.84, ptH / 4.6)
 
                 HStack(alignment: .center, spacing: 0) {
-                    Color.clear.frame(width: leftW)   // left panel placeholder
+                    Color.clear.frame(width: leftW)
                     boardCanvas(W: boardW, ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
                     boreOffTray(trayW: barW, ptH: ptH, cSz: cSz)
                     controlPanel
@@ -64,17 +64,57 @@ struct BoardView: View {
                 .padding(pad)
             }
         }
-        .overlay(alignment: .bottomLeading) {
-            Button { showSettings = true } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(PC.dim)
-                    .padding(9)
-                    .background(PC.bg.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(PC.cream.opacity(0.10), lineWidth: 1))
+        .overlay(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 6) {
+                if vm.professionalTimerEnabled {
+                    let elapsed  = vm.turnElapsedSeconds
+                    let wTurn    = vm.state.currentPlayer == .white && vm.dice != nil
+                    let bTurn    = vm.state.currentPlayer == .black && vm.dice != nil
+                    // Black clock — near top (adjust .padding(.top, N) to move up/down)
+                    clockBadge(seconds: vm.blackGameSeconds, burning: bTurn && elapsed > 12)
+                        .padding(.leading, -60)
+                }
+                Spacer()
+                if vm.professionalTimerEnabled || vm.regularTimerEnabled {
+                    let elapsed = vm.turnElapsedSeconds
+                    let wTurn   = vm.state.currentPlayer == .white && vm.dice != nil
+                    // 12s turn timer — white's move only, single line
+                    if wTurn {
+                        let remaining = max(0, 12 - elapsed)
+                        let over = elapsed > 12
+                        let tc: Color = over ? .orange : remaining <= 4 ? .red : remaining <= 8 ? .yellow : PC.cream
+                        HStack(spacing: 4) {
+                            Image(systemName: over ? "flame.fill" : "timer")
+                                .font(.system(size: 9, weight: .bold))
+                            Text(over ? "+\(elapsed - 12)s" : "\(remaining)s")
+                                .font(.system(size: 11, weight: .black, design: .monospaced))
+                        }
+                        .foregroundStyle(tc)
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(Capsule().fill(Color.black.opacity(0.55)))
+                        .overlay(Capsule().stroke(tc.opacity(0.35), lineWidth: 1))
+                        .lineLimit(1).fixedSize()
+                        .padding(.leading, -60)
+                    }
+                    // White/black game clocks — professional timer only
+                    if vm.professionalTimerEnabled {
+                        clockBadge(seconds: vm.whiteGameSeconds, burning: wTurn && elapsed > 12)
+                            .padding(.leading, -60)
+                    }
+                }
+                // Settings gear — sits off-screen left as a peeking tab
+                Button { showSettings = true } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(PC.dim)
+                        .padding(9)
+                        .background(PC.bg.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(PC.cream.opacity(0.10), lineWidth: 1))
+                }
+                .padding(.leading, -40)
             }
-            .padding(.leading, -40)
-            .padding(.bottom, 9)
+            .padding(.vertical, 9)
+            .frame(maxHeight: .infinity)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView().environment(vm)
@@ -163,6 +203,21 @@ struct BoardView: View {
     }
 
     // MARK: Board
+
+    private func clockBadge(seconds: Int, burning: Bool) -> some View {
+        let low = seconds < 60
+        let color: Color = low ? .red : burning ? .orange : PC.cream
+        return HStack(spacing: 4) {
+            Image(systemName: "clock.fill").font(.system(size: 9, weight: .bold))
+            Text(String(format: "%d:%02d", seconds / 60, seconds % 60))
+                .font(.system(size: 11, weight: .black, design: .monospaced))
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 8).padding(.vertical, 4)
+        .background(Capsule().fill(Color.black.opacity(0.55)))
+        .overlay(Capsule().stroke(color.opacity(0.35), lineWidth: 1))
+        .lineLimit(1).fixedSize()
+    }
 
     private func boardCanvas(W: CGFloat, ptW: CGFloat, ptH: CGFloat, barW: CGFloat, cSz: CGFloat) -> some View {
         ZStack {
@@ -1200,6 +1255,30 @@ private struct SettingsView: View {
                             .stroke(PC.cream.opacity(0.08), lineWidth: 1))
                 )
 
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("PROFESSIONAL TIMER")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("12 seconds per turn — any extra time is deducted from your 10-minute game clock")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.professionalTimerEnabled)
+                        .tint(PC.green)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
                 // COACH SETTINGS section
                 Text("COACH SETTINGS")
                     .font(.system(size: 11, weight: .black, design: .rounded))
@@ -1279,6 +1358,30 @@ private struct SettingsView: View {
                     }
                     Spacer()
                     Toggle("", isOn: $vm.openingDiceAsFirst)
+                        .tint(PC.brown)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("REGULAR TIMER")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("12 seconds per turn — turn ends automatically when time runs out")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.regularTimerEnabled)
                         .tint(PC.brown)
                         .labelsHidden()
                 }
