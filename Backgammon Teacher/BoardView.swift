@@ -26,10 +26,9 @@ struct BoardView: View {
     @State private var openingDisplayValues: (white: Int, black: Int) = (1, 1)
     @State private var openingRolling = false
     @State private var openingAnimTask: Task<Void, Never>?
-    @State private var openingFlyValue: Int? = nil   // value of the loser's die during flight
-    @State private var openingFlySign: CGFloat = 0   // +1 = flies from right→left, -1 = left→right
-    @State private var openingFlyProgress: CGFloat = 0
-    @State private var openingWinnerOffset: CGFloat = 0  // winner die slides outward to make room
+    @State private var openingDicePositioned = false   // true once both dice have frozen positions
+    @State private var openingWhiteDieX: CGFloat = 0
+    @State private var openingBlackDieX: CGFloat = 0
     @State private var capturedXOff: CGFloat = 40
     @State private var capturedDSz: CGFloat = 30
     @State private var openingFlyTask: Task<Void, Never>?
@@ -113,7 +112,8 @@ struct BoardView: View {
         }
         .onChange(of: vm.openingRollAnimID) { _, _ in
             guard vm.openingDice != nil else { return }
-            openingFlyTask?.cancel(); openingFlyValue = nil; openingFlyProgress = 0; openingWinnerOffset = 0
+            openingFlyTask?.cancel()
+            openingDicePositioned = false
             openingAnimTask?.cancel()
             openingRolling = true
             openingDisplayValues = (Int.random(in: 1...6), Int.random(in: 1...6))
@@ -128,28 +128,36 @@ struct BoardView: View {
             }
         }
         .onChange(of: vm.openingDice == nil) { _, isNil in
-            if isNil { openingFlyTask?.cancel(); openingFlyValue = nil; openingFlyProgress = 0 }
+            if isNil { openingFlyTask?.cancel(); openingDicePositioned = false }
         }
         .onChange(of: openingRolling) { _, newVal in
             guard !newVal, let od = vm.openingDice, od.white != od.black else { return }
             openingFlyTask?.cancel()
-            openingFlyValue = nil; openingFlyProgress = 0
+            openingDicePositioned = false
             openingFlyTask = Task {
                 try? await Task.sleep(for: .milliseconds(300))
                 guard !Task.isCancelled else { return }
-                // Loser's die flies to winner's side
-                // White wins: black's die (left) flies right  → flySign = -1
-                // Black wins: white's die (right) flies left  → flySign = +1
+                // Compute final side-by-side positions (both frozen from current geometry)
+                // Both dice slide simultaneously — winner moves spacing/2 outward, loser crosses the board
                 let whiteWins = od.white > od.black
-                openingFlyValue = whiteWins ? od.black : od.white
-                openingFlySign  = whiteWins ? -1.0 : 1.0
-                openingFlyProgress = 0
+                let spacing = capturedDSz + 4
+                let cx = capturedXOff          // centre of winner's current position
+                // Final positions: pair centred on cx, on the winner's side
+                // Black wins → left side: white(small) outer-left, black(big) inner-left
+                // White wins → right side: white(big) inner-right, black(small) outer-right
+                let wFinal: CGFloat = whiteWins ?  (cx - spacing / 2) : -(cx + spacing / 2)
+                let bFinal: CGFloat = whiteWins ?  (cx + spacing / 2) : -(cx - spacing / 2)
+                // Place both at their current starting positions before animating
+                openingWhiteDieX =  capturedXOff
+                openingBlackDieX = -capturedXOff
+                openingDicePositioned = true
                 try? await Task.sleep(for: .milliseconds(16))
                 guard !Task.isCancelled else { return }
                 withAnimation(.easeInOut(duration: 0.45)) {
-                    openingFlyProgress = 1
+                    openingWhiteDieX = wFinal
+                    openingBlackDieX = bFinal
                 }
-                // Leave fly state set so dice stay in settled positions until game starts
+                // Leave positioned so dice stay put until game starts
             }
         }
     }
@@ -177,28 +185,15 @@ struct BoardView: View {
                 let xOff: CGFloat = ptW * 3 + barW / 2
                 let wVal = openingRolling ? openingDisplayValues.white : od.white
                 let bVal = openingRolling ? openingDisplayValues.black : od.black
-                // Capture geometry for fly animation
+                // Capture geometry once so task can read it before animation starts
                 Color.clear.frame(width: 0, height: 0)
                     .task(id: xOff) { capturedXOff = xOff }
                     .task(id: dSz)  { capturedDSz  = dSz  }
-                let flying = openingFlyValue != nil
-                // Winner die stays fixed; flyer lands on the OUTER side of the winner
-                // Black wins: white die flies left, lands at -(xOff+gap) → order: small, big (left→right) ✓
-                // White wins: black die flies right, lands at +(xOff+gap) → order: big, small (left→right) ✓
-                if !(flying && openingFlySign > 0) {
-                    DiceFaceView(value: wVal, size: dSz).offset(x: xOff)
-                }
-                if !(flying && openingFlySign < 0) {
-                    DiceFaceView(value: bVal, size: dSz).offset(x: -xOff)
-                }
-                if let flyVal = openingFlyValue {
-                    let flyStart: CGFloat = openingFlySign > 0 ? capturedXOff : -capturedXOff
-                    let flyEnd:   CGFloat = openingFlySign > 0
-                        ? -(capturedXOff + capturedDSz + 4)   // black wins: white lands outside-left
-                        :  (capturedXOff + capturedDSz + 4)   // white wins: black lands outside-right
-                    DiceFaceView(value: flyVal, size: dSz)
-                        .offset(x: flyStart + openingFlyProgress * (flyEnd - flyStart))
-                }
+                // Both dice always visible; positions are frozen state vars once animation begins
+                DiceFaceView(value: wVal, size: dSz)
+                    .offset(x: openingDicePositioned ? openingWhiteDieX : xOff)
+                DiceFaceView(value: bVal, size: dSz)
+                    .offset(x: openingDicePositioned ? openingBlackDieX : -xOff)
                 if !openingRolling {
                     let label = od.white > od.black ? "YOU START" : od.black > od.white ? "OPPONENT STARTS" : "REROLL"
                     Text(label)
