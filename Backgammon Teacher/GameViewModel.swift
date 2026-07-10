@@ -22,6 +22,7 @@ final class GameViewModel {
     var selectedPoint: Int? = nil
     private(set) var allLegalMoves: [Move] = []
     private var history: [(BoardState, Dice)] = []
+    private var moveHistory: [CheckerMove] = []
     var flightInfo: FlightInfo? = nil
     private(set) var diceRollID: Int = 0
     var dragSource: Int? = nil
@@ -38,6 +39,9 @@ final class GameViewModel {
     private var isAutoPlayInProgress: Bool = false
     private(set) var lastAnalysis: MoveAnalysis? = nil
     private var analysisTask: Task<Void, Never>? = nil
+    private(set) var openingDice: (white: Int, black: Int)? = nil
+    private(set) var openingRollAnimID: Int = 0
+    private var openingTask: Task<Void, Never>? = nil
 
     // MARK: Settings
     var advancedMode: Bool = UserDefaults.standard.bool(forKey: "advancedMode") {
@@ -57,6 +61,14 @@ final class GameViewModel {
         || UserDefaults.standard.bool(forKey: "aiDoublingEnabled") {
         didSet { UserDefaults.standard.set(aiDoublingEnabled, forKey: "aiDoublingEnabled") }
     }
+    var vurKacRuleEnabled: Bool = UserDefaults.standard.bool(forKey: "vurKacRuleEnabled") {
+        didSet { UserDefaults.standard.set(vurKacRuleEnabled, forKey: "vurKacRuleEnabled") }
+    }
+    var openingDiceAsFirst: Bool = UserDefaults.standard.bool(forKey: "openingDiceAsFirst") {
+        didSet { UserDefaults.standard.set(openingDiceAsFirst, forKey: "openingDiceAsFirst") }
+    }
+    var vurKacViolation = false
+    private var pendingOpeningDice: (Int, Int)? = nil
 
     // MARK: Doubling cube + turn-start gate (active only when advancedMode is on)
     private(set) var cubeValue: Int = 1
@@ -131,12 +143,42 @@ final class GameViewModel {
         return sources
     }
 
+    private func doOpeningRoll() {
+        let w = Int.random(in: 1...6)
+        let b = Int.random(in: 1...6)
+        openingRollAnimID += 1
+        openingDice = (white: w, black: b)
+        openingTask = Task {
+            try? await Task.sleep(for: .milliseconds(1500))
+            guard !Task.isCancelled else { return }
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                if w == b {
+                    doOpeningRoll()
+                } else {
+                    state.currentPlayer = w > b ? .white : .black
+                    if openingDiceAsFirst {
+                        pendingOpeningDice = (w, b)
+                        // Keep openingDice visible; rollDice() will clear it when dice are ready
+                    } else {
+                        openingDice = nil
+                    }
+                    startTurn()
+                }
+            }
+        }
+    }
+
     private func startTurn() {
-        if advancedMode && state.currentPlayer == .white {
+        let skipCube = openingDiceAsFirst && pendingOpeningDice != nil
+        if advancedMode && state.currentPlayer == .white && !skipCube {
             pendingRoll = true
-        } else if advancedMode && state.currentPlayer == .black {
+        } else if advancedMode && state.currentPlayer == .black && !skipCube {
             scheduleAICubeDecision()
         } else {
+            // In advanced mode, canRoll requires pendingRoll for white;
+            // set it here so rollDice() passes the guard (it clears it immediately).
+            if advancedMode && state.currentPlayer == .white { pendingRoll = true }
             rollDice()
         }
     }
@@ -144,10 +186,20 @@ final class GameViewModel {
     func rollDice() {
         guard canRoll else { return }
         pendingRoll = false
-        let d = Dice()
+        let d: Dice
+        let usingOpeningValues: Bool
+        if let (d1, d2) = pendingOpeningDice {
+            pendingOpeningDice = nil
+            openingDice = nil
+            d = Dice(d1, d2)
+            usingOpeningValues = true
+        } else {
+            d = Dice()
+            usingOpeningValues = false
+        }
         dice = d
-        diceRollID += 1
-        allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
+        if !usingOpeningValues { diceRollID += 1 }
+        allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
         if allLegalMoves.isEmpty {
             noMovesAvailable = true
             scheduleAutoEnd()
@@ -202,12 +254,13 @@ final class GameViewModel {
         autoPlayTask?.cancel()
         noMovesAvailable = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
+        if !moveHistory.isEmpty { moveHistory.removeLast() }
         guard let (prevState, prevDice) = history.popLast() else { return }
         state = prevState
         dice = prevDice
         selectedPoint = nil
         pendingEndTurn = false
-        allLegalMoves = MoveGenerator.legalMoves(for: state, dice: prevDice)
+        allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: prevDice), from: state)
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
         }
@@ -249,6 +302,7 @@ final class GameViewModel {
     }
 
     private func applyStep(_ step: CheckerMove) {
+        moveHistory.append(step)
         // Skip flight animation for drag moves — the user already positioned the checker manually.
         if dragPosition == nil {
             flightInfo = FlightInfo(from: step.from, to: step.to, isWhite: state.currentPlayer == .white, isAutoPlay: isAutoPlayInProgress)
@@ -280,41 +334,38 @@ final class GameViewModel {
     }
 
     func newGame() {
-        autoEndTask?.cancel()
-        autoPlayTask?.cancel()
+        autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         whiteScore = 0; blackScore = 0; scoreRecorded = false
         state = .makeInitial()
-        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
-        flightInfo = nil; dragSource = nil; dragPosition = nil
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; moveHistory = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil; openingDice = nil; pendingOpeningDice = nil
         isSetupMode = false
-        startTurn()
+        doOpeningRoll()
     }
 
     func rematch() {
-        autoEndTask?.cancel()
-        autoPlayTask?.cancel()
+        autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         scoreRecorded = false
         state = .makeInitial()
-        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
-        flightInfo = nil; dragSource = nil; dragPosition = nil
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; moveHistory = []; pendingEndTurn = false
+        flightInfo = nil; dragSource = nil; dragPosition = nil; openingDice = nil; pendingOpeningDice = nil
         isSetupMode = false
-        startTurn()
+        doOpeningRoll()
     }
 
     func enterSetupMode() {
-        autoEndTask?.cancel()
-        autoPlayTask?.cancel()
+        autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         flightInfo = nil
-        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; moveHistory = []; pendingEndTurn = false
         state = .makeEmpty()
         isSetupMode = true
     }
@@ -341,13 +392,13 @@ final class GameViewModel {
     }
 
     func startFromSetup(as player: Player) {
-        autoEndTask?.cancel()
-        autoPlayTask?.cancel()
+        autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        openingDice = nil; pendingOpeningDice = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         state.currentPlayer = player
         isSetupMode = false
-        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
+        dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; moveHistory = []; pendingEndTurn = false; flightInfo = nil
         if useFixedDice {
             rollFixedDice()
         } else {
@@ -359,7 +410,7 @@ final class GameViewModel {
         let d = Dice(setupDie1, setupDie2)
         dice = d
         diceRollID += 1
-        allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
+        allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
         if allLegalMoves.isEmpty {
             noMovesAvailable = true
             if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
@@ -398,7 +449,7 @@ final class GameViewModel {
         scoreRecorded = true
         droppedWinner = winner   // allows rematch, unlike resignedWinner
         pendingDouble = false; pendingRoll = false; cubeResponseMessage = nil
-        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; moveHistory = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
@@ -408,11 +459,25 @@ final class GameViewModel {
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
         noMovesAvailable = false; pendingRoll = false
         resignedWinner = state.currentPlayer.opponent
-        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; pendingEndTurn = false
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; moveHistory = []; pendingEndTurn = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
     }
 
     func confirmEndTurn() {
+        if vurKacRuleEnabled, state.currentPlayer == .white,
+           let (preTurnState, preTurnDice) = history.first {
+            let violation = (1...6).contains(where: { p in
+                preTurnState.points[p] == -1 && state.points[p] == 0
+            })
+            if violation {
+                let steps = moveHistory
+                let histSnap = history
+                history = []; moveHistory = []
+                selectedPoint = nil; pendingEndTurn = false
+                animateRevertToTurnStart(steps: steps, historySnap: histSnap)
+                return
+            }
+        }
         analysisTask?.cancel()
         analysisTask = nil
         if coachMode, let (preTurnState, preTurnDice) = history.first, state.winner == nil {
@@ -443,7 +508,7 @@ final class GameViewModel {
             if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
             return
         }
-        allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
+        allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
         if allLegalMoves.isEmpty {
             noMovesAvailable = true
             if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
@@ -475,6 +540,48 @@ final class GameViewModel {
             isAutoPlayInProgress = true
             commitMove(to: step.to)
             isAutoPlayInProgress = false
+        }
+    }
+
+    private func animateRevertToTurnStart(steps: [CheckerMove], historySnap: [(BoardState, Dice)]) {
+        Task { @MainActor in
+            for (i, step) in steps.reversed().enumerated() {
+                let snapIdx = historySnap.count - 1 - i
+                guard snapIdx >= 0 else { break }
+                let (prevState, prevDice) = historySnap[snapIdx]
+                // Restore state first so the board reflects the reverted position
+                state = prevState
+                dice = prevDice
+                // Flight animation: checker flies backwards (original to → original from)
+                flightInfo = FlightInfo(from: step.to, to: step.from, isWhite: true)
+                try? await Task.sleep(for: .milliseconds(600))
+            }
+            // Final cleanup
+            flightInfo = nil
+            dragSource = nil; dragPosition = nil
+            noMovesAvailable = false
+            if let d = dice {
+                allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
+            }
+            vurKacViolation = true
+        }
+    }
+
+    private func filterVurKac(_ moves: [Move], from boardBefore: BoardState) -> [Move] {
+        guard vurKacRuleEnabled else { return moves }
+        let player = boardBefore.currentPlayer
+        let homeRange = player == .white ? 1...6 : 19...24
+        let sign = player == .white ? 1 : -1
+        return moves.filter { move in
+            var hitPoints: Set<Int> = []
+            var s = boardBefore
+            for step in move {
+                if homeRange.contains(step.to) && s.points[step.to] == -sign {
+                    hitPoints.insert(step.to)
+                }
+                s = s.applying(step)
+            }
+            return hitPoints.allSatisfy { s.points[$0] * sign > 0 }
         }
     }
 
@@ -559,7 +666,7 @@ final class GameViewModel {
         autoPlayTask?.cancel()
         noMovesAvailable = false
         pendingEndTurn = false; pendingRoll = false
-        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; flightInfo = nil
+        dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; moveHistory = []; flightInfo = nil
         dragSource = nil; dragPosition = nil
         if state.winner == nil {
             state.currentPlayer = state.currentPlayer.opponent

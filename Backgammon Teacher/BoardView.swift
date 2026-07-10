@@ -23,9 +23,21 @@ struct BoardView: View {
     @State private var diceDisplayValues: [Int] = []
     @State private var diceRolling = false
     @State private var diceAnimTask: Task<Void, Never>?
+    @State private var openingDisplayValues: (white: Int, black: Int) = (1, 1)
+    @State private var openingRolling = false
+    @State private var openingAnimTask: Task<Void, Never>?
+    @State private var openingFlyValue: Int? = nil   // value of the loser's die during flight
+    @State private var openingFlySign: CGFloat = 0   // +1 = flies from right→left, -1 = left→right
+    @State private var openingFlyProgress: CGFloat = 0
+    @State private var openingWinnerOffset: CGFloat = 0  // winner die slides outward to make room
+    @State private var capturedXOff: CGFloat = 40
+    @State private var capturedDSz: CGFloat = 30
+    @State private var openingFlyTask: Task<Void, Never>?
     @State private var showSettings = false
     @State private var showExplanation = false
     @State private var explanationAnalysis: MoveAnalysis? = nil
+    @State private var showVurKacToast = false
+    @State private var vurKacToastTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -71,6 +83,17 @@ struct BoardView: View {
         .sheet(isPresented: $showExplanation) {
             if let a = explanationAnalysis { ExplanationSheet(analysis: a) }
         }
+        .onChange(of: vm.vurKacViolation) { _, newVal in
+            guard newVal else { return }
+            vm.vurKacViolation = false
+            vurKacToastTask?.cancel()
+            showVurKacToast = true
+            vurKacToastTask = Task {
+                try? await Task.sleep(for: .milliseconds(2000))
+                guard !Task.isCancelled else { return }
+                showVurKacToast = false
+            }
+        }
         .onChange(of: vm.diceRollID) { _, _ in
             guard let dice = vm.dice else { return }
             diceAnimTask?.cancel()
@@ -86,6 +109,47 @@ struct BoardView: View {
                 }
                 guard !Task.isCancelled else { return }
                 diceRolling = false
+            }
+        }
+        .onChange(of: vm.openingRollAnimID) { _, _ in
+            guard vm.openingDice != nil else { return }
+            openingFlyTask?.cancel(); openingFlyValue = nil; openingFlyProgress = 0; openingWinnerOffset = 0
+            openingAnimTask?.cancel()
+            openingRolling = true
+            openingDisplayValues = (Int.random(in: 1...6), Int.random(in: 1...6))
+            openingAnimTask = Task {
+                for _ in 0..<8 {
+                    guard !Task.isCancelled else { return }
+                    openingDisplayValues = (Int.random(in: 1...6), Int.random(in: 1...6))
+                    try? await Task.sleep(for: .milliseconds(60))
+                }
+                guard !Task.isCancelled else { return }
+                openingRolling = false
+            }
+        }
+        .onChange(of: vm.openingDice == nil) { _, isNil in
+            if isNil { openingFlyTask?.cancel(); openingFlyValue = nil; openingFlyProgress = 0 }
+        }
+        .onChange(of: openingRolling) { _, newVal in
+            guard !newVal, let od = vm.openingDice, od.white != od.black else { return }
+            openingFlyTask?.cancel()
+            openingFlyValue = nil; openingFlyProgress = 0
+            openingFlyTask = Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                // Loser's die flies to winner's side
+                // White wins: black's die (left) flies right  → flySign = -1
+                // Black wins: white's die (right) flies left  → flySign = +1
+                let whiteWins = od.white > od.black
+                openingFlyValue = whiteWins ? od.black : od.white
+                openingFlySign  = whiteWins ? -1.0 : 1.0
+                openingFlyProgress = 0
+                try? await Task.sleep(for: .milliseconds(16))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeInOut(duration: 0.45)) {
+                    openingFlyProgress = 1
+                }
+                // Leave fly state set so dice stay in settled positions until game starts
             }
         }
     }
@@ -108,15 +172,65 @@ struct BoardView: View {
             .shadow(color: .black.opacity(0.4), radius: 6, y: 3)
 
             // Overlays sit outside the clip so flight animation and drag disc can extend freely.
+            if let od = vm.openingDice {
+                let dSz: CGFloat = min(ptW * 0.74, 40)
+                let xOff: CGFloat = ptW * 3 + barW / 2
+                let wVal = openingRolling ? openingDisplayValues.white : od.white
+                let bVal = openingRolling ? openingDisplayValues.black : od.black
+                // Capture geometry for fly animation
+                Color.clear.frame(width: 0, height: 0)
+                    .task(id: xOff) { capturedXOff = xOff }
+                    .task(id: dSz)  { capturedDSz  = dSz  }
+                let flying = openingFlyValue != nil
+                // Winner die stays fixed; flyer lands on the OUTER side of the winner
+                // Black wins: white die flies left, lands at -(xOff+gap) → order: small, big (left→right) ✓
+                // White wins: black die flies right, lands at +(xOff+gap) → order: big, small (left→right) ✓
+                if !(flying && openingFlySign > 0) {
+                    DiceFaceView(value: wVal, size: dSz).offset(x: xOff)
+                }
+                if !(flying && openingFlySign < 0) {
+                    DiceFaceView(value: bVal, size: dSz).offset(x: -xOff)
+                }
+                if let flyVal = openingFlyValue {
+                    let flyStart: CGFloat = openingFlySign > 0 ? capturedXOff : -capturedXOff
+                    let flyEnd:   CGFloat = openingFlySign > 0
+                        ? -(capturedXOff + capturedDSz + 4)   // black wins: white lands outside-left
+                        :  (capturedXOff + capturedDSz + 4)   // white wins: black lands outside-right
+                    DiceFaceView(value: flyVal, size: dSz)
+                        .offset(x: flyStart + openingFlyProgress * (flyEnd - flyStart))
+                }
+                if !openingRolling {
+                    let label = od.white > od.black ? "YOU START" : od.black > od.white ? "OPPONENT STARTS" : "REROLL"
+                    Text(label)
+                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .foregroundStyle(PC.cream)
+                        .kerning(2)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(PC.bg.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
+                }
+            }
             // Hide overlay while white's double offer awaits AI response (pendingDouble + white offered)
-            let showOverlay = vm.cubeResponseMessage != nil ||
+            let showOverlay = vm.openingDice == nil && (
+                vm.cubeResponseMessage != nil ||
                 (vm.pendingDouble && vm.state.currentPlayer == .black) ||
                 (!vm.pendingDouble && (vm.dice != nil || vm.pendingRoll))
+            )
             if showOverlay { boardOverlay(ptW: ptW, barW: barW) }
             CheckerFlightOverlay(ptW: ptW, ptH: ptH, barW: barW, cSz: cSz)
             if let pos = vm.dragPosition {
                 dragDisc(isWhite: vm.state.currentPlayer == .white, cSz: cSz)
                     .position(pos)
+                    .allowsHitTesting(false)
+            }
+            if showVurKacToast {
+                Text("HIT & RUN NOT ALLOWED")
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.cream)
+                    .kerning(2)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(PC.bg.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
                     .allowsHitTesting(false)
             }
         }
@@ -1054,9 +1168,19 @@ private struct SettingsView: View {
                 .padding(.bottom, 20)
 
                 Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 4)
 
-                // Advanced mode toggle
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+
+                // PROFESSIONAL RULES section
+                Text("PROFESSIONAL RULES")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.dim)
+                    .kerning(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 8)
+
                 HStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("ADVANCED MODE")
@@ -1081,7 +1205,15 @@ private struct SettingsView: View {
                             .stroke(PC.cream.opacity(0.08), lineWidth: 1))
                 )
 
-                // Coach mode toggle
+                // COACH SETTINGS section
+                Text("COACH SETTINGS")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.dim)
+                    .kerning(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 14)
+                    .padding(.bottom, 8)
+
                 HStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("COACH MODE")
@@ -1106,20 +1238,29 @@ private struct SettingsView: View {
                             .stroke(PC.cream.opacity(0.08), lineWidth: 1))
                 )
 
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("AI DOUBLING")
+                // Street Rules section
+                Text("STREET RULES")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.dim)
+                    .kerning(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 14)
+                    .padding(.bottom, 8)
+
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("HIT & RUN NOT ALLOWED")
                             .font(.system(size: 12, weight: .black, design: .rounded))
                             .foregroundStyle(PC.cream)
                             .kerning(1.5)
-                        Text("Allow the AI to offer and respond to doubling cube decisions")
+                        Text("In your home board, you cannot hit a blot and leave the point empty — your checker must stay (or be covered by another)")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(PC.dim)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
-                    Toggle("", isOn: $vm.aiDoublingEnabled)
-                        .tint(PC.green)
+                    Toggle("", isOn: $vm.vurKacRuleEnabled)
+                        .tint(PC.brown)
                         .labelsHidden()
                 }
                 .padding(14)
@@ -1130,11 +1271,39 @@ private struct SettingsView: View {
                             .stroke(PC.cream.opacity(0.08), lineWidth: 1))
                 )
 
-                Spacer()
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("PLAY OPENING DICE FIRST")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("The two dice rolled to decide who starts must be used as that player's first move")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.openingDiceAsFirst)
+                        .tint(PC.brown)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                    } // VStack inside ScrollView
+                    .padding(.top, 16)
+                    .padding(.bottom, 24)
+                } // ScrollView
             }
-            .padding(24)
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationBackground(Color(red: 0.12, green: 0.07, blue: 0.02))
         .presentationCornerRadius(16)
         .preferredColorScheme(.dark)
