@@ -1,0 +1,205 @@
+ã
+
+x*	
+»†ÄR
+output
+*
+êÄ¢ﬂ¢4
+#com.github.apple.coremltools.sourcetorch==2.12.0¢:
++com.github.apple.coremltools.source_dialectTorchScript¢+
+$com.github.apple.coremltools.version9.0¢:
+,com.github.apple.coremltools.conversion_date
+2026-07-08≤‘Ê
+main›
+
+x
+
+
+»CoreML6∑
+CoreML6´outputf
+const
+x_to_fp16_dtype_0
+*
+val
+
+
+"
+fp16*'
+name
+
+"
+x_to_fp16_dtype_0§
+const,
+net_0_weight_to_fp16
+
+
+†
+»*A
+val:
+
+
+†
+»*"
+@model_path/weights/weight.bin@**
+name"
+
+"
+net_0_weight_to_fp16î
+const#
+net_0_bias_to_fp16
+
+
+†*<
+val5
+
+
+†*$
+@model_path/weights/weight.binÄı*(
+name 
+
+"
+net_0_bias_to_fp16r
+cast
+dtype
+
+x_to_fp16_dtype_0
+
+x
+
+x 
+	x_to_fp16
+
+
+
+»*
+name
+
+
+"
+cast_1µ
+linear
+bias
+
+net_0_bias_to_fp16
+x
+
+	x_to_fp16"
+weight
+
+net_0_weight_to_fp16)
+linear_0_cast_fp16
+
+
+
+†*(
+name 
+
+"
+linear_0_cast_fp16y
+sigmoid
+x
+
+linear_0_cast_fp16(
+input_3_cast_fp16
+
+
+
+†*'
+name
+
+"
+input_3_cast_fp16§
+const+
+net_2_weight_to_fp16
+
+
+
+†*B
+val;
+
+
+
+†*$
+@model_path/weights/weight.binÄ¯**
+name"
+
+"
+net_2_weight_to_fp16Ä
+const"
+net_2_bias_to_fp16
+
+
+
+*)
+val"
+
+
+
+
+:
+=•[´¶”≤!+Ë°*(
+name 
+
+"
+net_2_bias_to_fp16º
+linear
+bias
+
+net_2_bias_to_fp16
+x
+
+input_3_cast_fp16"
+weight
+
+net_2_weight_to_fp16(
+linear_1_cast_fp16
+
+
+
+*(
+name 
+
+"
+linear_1_cast_fp16k
+sigmoid
+x
+
+linear_1_cast_fp16
+output
+
+
+
+*%
+name
+
+"
+op_12_cast_fp16"Ê
+	buildInfoÿ"
+
+
+≈"¬
+6
+!
+
+"
+coremltools-version
+	
+"
+9.0
+A
+)
+!
+"
+coremltools-component-torch
+
+
+"
+2.12.0
+E
+(
+ 
+"
+coremltools-source-dialect
+
+"
+TorchScript

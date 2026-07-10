@@ -8,16 +8,27 @@ struct AIPlayer {
         try? TDGammon(configuration: MLModelConfiguration())
     }()
 
-    // All 21 distinct dice outcomes. Non-doubles have weight 2, doubles weight 1 (out of 36 total).
-    private static let allDice: [(d1: Int, d2: Int, weight: Int)] = {
-        var outcomes: [(Int, Int, Int)] = []
+    // Decision depth for the AI's move search (PLAY TIME ONLY; training stays 0-ply).
+    // 1 = static 1-ply choice, 2 = TD-Gammon-style 2-ply (default), 3 = deeper/slower.
+    static let searchPlies = 2
+
+    // All 21 distinct dice outcomes as Dice, weighted 2 for non-doubles / 1 for doubles
+    // (sums to 36). Chance-node weights for the expectiminimax search.
+    private static let all21Rolls: [(dice: Dice, weight: Float)] = {
+        var out: [(Dice, Float)] = []
         for d1 in 1...6 {
             for d2 in d1...6 {
-                outcomes.append((d1, d2, d1 == d2 ? 1 : 2))
+                out.append((Dice(d1, d2), d1 == d2 ? 1 : 2))
             }
         }
-        return outcomes
+        return out
     }()
+
+    // 6-output equity weights and the perspective-swap permutation. Vectors SWAP
+    // (my_vec = opp_vec[swap]); only scalar equity negates. The model is only ever
+    // queried on the side-about-to-roll's perspective — the same invariant as training.
+    private static let W: [Float] = [1, 2, 3, -1, -2, -3]
+    private static let swap: [Int] = [3, 4, 5, 0, 1, 2]
 
     // Returns equity and raw 6-probability array from `player`'s perspective.
     static func equityAndProbs(
@@ -41,129 +52,115 @@ struct AIPlayer {
         return (equity, probs)
     }
 
+    // (equity, probs) for `mover` of a position `mover` just moved into — i.e. the
+    // OPPONENT is about to roll. Queries the model from the opponent's perspective
+    // (training's "side about to roll" invariant), then swaps back to the mover's
+    // frame: vectors swap, scalar equity == -oppEquity.
+    static func equityAndProbsAfterMove(
+        for state: BoardState,
+        mover: Player,
+        cube: Int = 1,
+        cubeOwner: Player? = nil
+    ) -> (equity: Float, probs: [Float])? {
+        guard let (_, oppProbs) = equityAndProbs(for: state, player: mover.opponent,
+                                                 cube: cube, cubeOwner: cubeOwner) else { return nil }
+        let myProbs = swap.map { oppProbs[$0] }
+        var equity: Float = 0
+        for i in 0..<6 { equity += W[i] * myProbs[i] }
+        return (equity, myProbs)
+    }
+
     // Network equity from `player`'s perspective at the given state (no move applied).
     private static func evalEquity(state: BoardState, player: Player, cube: Int, cubeOwner: Player?) -> Float? {
         equityAndProbs(for: state, player: player, cube: cube, cubeOwner: cubeOwner)?.equity
     }
 
-    // 1-ply: pick the move with the highest equity from `player`'s perspective.
-    // Returns the best move and its resulting board state, or nil on failure.
-    private static func best1Ply(
-        moves: [Move],
-        state: BoardState,
-        player: Player,
-        cube: Int,
-        cubeOwner: Player?
-    ) -> (move: Move, next: BoardState, equity: Float)? {
-        guard !moves.isEmpty else { return nil }
-        var best: (move: Move, next: BoardState, equity: Float)? = nil
-        for move in moves {
-            var next = state
-            for step in move { next = next.applying(step) }
-            guard let eq = evalEquity(state: next, player: player, cube: cube, cubeOwner: cubeOwner) else { continue }
-            if best == nil || eq > best!.equity { best = (move, next, eq) }
-        }
-        return best
+    // Probs from `perspective`'s view (perspective = the side about to roll).
+    private static func rawProbs(for state: BoardState, perspective: Player) -> [Float]? {
+        equityAndProbs(for: state, player: perspective)?.probs
     }
 
-    // 3-ply search with forward pruning — mirrors choose_move() in Python.
-    // K=5 candidate moves kept after ply-1 pre-filter.
-    // J=3 opponent moves kept after ply-2 pruning.
-    // Ply-3 is a full 21-outcome expectation from the leaf.
-    static func bestMove(for state: BoardState, moves: [Move], cube: Int = 1, cubeOwner: Player? = nil) -> Move? {
-        guard let model, !moves.isEmpty else { return nil }
-        let player = state.currentPlayer
-        let K = 5
-        let J = 3
+    // Dot the 6-vector with the equity weights.
+    private static func equity(of probs: [Float]) -> Float {
+        var e: Float = 0
+        for i in 0..<6 { e += W[i] * probs[i] }
+        return e
+    }
 
-        // --- Ply 1: score each candidate by 1-ply equity, keep top K ---
+    // Expected 6-vector outcome probs from `sideToRoll`'s perspective, looking `plies`
+    // half-moves ahead. plies == 0 → a single static model query. Chance nodes average
+    // over the 21 rolls; decision nodes pick the mover's best move. Vectors swap down
+    // the tree (child is the opponent's view); only scalar equity negates.
+    // SEARCH IS PLAY-TIME ONLY — never used in the training loop.
+    static func expectedProbs(_ state: BoardState, sideToRoll: Player, plies: Int) -> [Float]? {
+        if plies == 0 { return rawProbs(for: state, perspective: sideToRoll) }
+        var acc = [Float](repeating: 0, count: 6)
+        for (dice, weight) in all21Rolls {
+            var s = state
+            s.currentPlayer = sideToRoll
+            let moves = MoveGenerator.legalMoves(for: s, dice: dice)
+            var bestVec: [Float]
+            if moves.isEmpty {
+                // Dance: turn passes to the opponent, board unchanged.
+                guard let child = expectedProbs(s, sideToRoll: sideToRoll.opponent, plies: plies - 1)
+                else { return nil }
+                bestVec = swap.map { child[$0] }
+            } else {
+                var bestEq = -Float.greatestFiniteMagnitude
+                bestVec = [Float](repeating: 0, count: 6)
+                for m in moves {
+                    var next = s
+                    for step in m { next = next.applying(step) }
+                    guard let child = expectedProbs(next, sideToRoll: sideToRoll.opponent, plies: plies - 1)
+                    else { continue }
+                    let mine = swap.map { child[$0] }   // child is opponent's view; swap to sideToRoll's
+                    let eq = equity(of: mine)
+                    if eq > bestEq { bestEq = eq; bestVec = mine }
+                }
+            }
+            for i in 0..<6 { acc[i] += weight * bestVec[i] }
+        }
+        return acc.map { $0 / 36 }
+    }
+
+    // n-ply expectiminimax move choice (default `searchPlies`). Pre-scores every
+    // candidate with a 1-ply static eval, keeps a survivor set (top K plus any within
+    // 0.08 equity of the best), then deep-searches only the survivors. plies <= 1
+    // reproduces the static 1-ply choice.
+    static func bestMove(for state: BoardState, moves: [Move], cube: Int = 1, cubeOwner: Player? = nil) -> Move? {
+        guard model != nil, !moves.isEmpty else { return nil }
+        let player = state.currentPlayer
+        let opponent = player.opponent
+        let plies = searchPlies
+
+        // Ply-1 static pre-score of every candidate.
         var scored: [(move: Move, next: BoardState, eq1: Float)] = []
         for move in moves {
             var next = state
             for step in move { next = next.applying(step) }
-            guard let eq = evalEquity(state: next, player: player, cube: cube, cubeOwner: cubeOwner) else { continue }
+            guard let (eq, _) = equityAndProbsAfterMove(for: next, mover: player,
+                                                        cube: cube, cubeOwner: cubeOwner) else { continue }
             scored.append((move, next, eq))
         }
         guard !scored.isEmpty else { return moves.first }
         scored.sort { $0.eq1 > $1.eq1 }
-        let candidates = Array(scored.prefix(K))
+        if plies <= 1 { return scored.first!.move }
 
-        let opponent = player.opponent
-        var bestFinalEquity: Float = -.greatestFiniteMagnitude
-        var bestMove: Move? = candidates.first?.move
+        // Survivor set: top K plus any near-tie within 0.08 equity of the best.
+        let K = 5
+        let bestEq1 = scored.first!.eq1
+        var survivors = Array(scored.prefix(K))
+        for s in scored.dropFirst(K) where bestEq1 - s.eq1 <= 0.08 { survivors.append(s) }
 
-        for candidate in candidates {
-            // After applying our move, it's the opponent's turn.
-            var oppState = candidate.next
-            oppState.currentPlayer = opponent
-
-            // --- Ply 2: average over opponent dice, keep J best opponent responses ---
-            // For each dice outcome, find the opponent's best 1-ply reply.
-            // Score from opponent's perspective, then take the J outcomes that hurt us most.
-            var ply2Samples: [(weight: Int, oppNext: BoardState, oppEq: Float)] = []
-
-            for (d1, d2, weight) in allDice {
-                let oppDice = Dice(d1, d2)
-                let oppMoves = MoveGenerator.legalMoves(for: oppState, dice: oppDice)
-                if oppMoves.isEmpty {
-                    // Opponent has no moves — their state passes unchanged
-                    ply2Samples.append((weight, oppState, 0))
-                    continue
-                }
-                guard let oppBest = best1Ply(moves: oppMoves, state: oppState,
-                                             player: opponent, cube: cube, cubeOwner: cubeOwner)
-                else { continue }
-                // oppBest.equity is from opponent's view; higher = worse for us
-                ply2Samples.append((weight, oppBest.next, oppBest.equity))
-            }
-
-            // Prune to J outcomes that are best for the opponent (worst for us)
-            let pruned = ply2Samples.sorted { $0.oppEq > $1.oppEq }.prefix(J)
-
-            // --- Ply 3: for each pruned opponent reply, expectimax over our dice ---
-            var weightedEquitySum: Float = 0
-            var weightedEquityTotal: Float = 0
-
-            for sample in pruned {
-                var myState = sample.oppNext
-                myState.currentPlayer = player
-
-                var ply3Sum: Float = 0
-                var ply3Total: Float = 0
-
-                for (d1, d2, weight) in allDice {
-                    let myDice = Dice(d1, d2)
-                    let myMoves = MoveGenerator.legalMoves(for: myState, dice: myDice)
-                    let w = Float(weight)
-                    if myMoves.isEmpty {
-                        // No moves; evaluate state as-is
-                        let eq = evalEquity(state: myState, player: player, cube: cube, cubeOwner: cubeOwner) ?? 0
-                        ply3Sum   += w * eq
-                        ply3Total += w
-                        continue
-                    }
-                    // Pick best leaf move by 1-ply
-                    if let leafBest = best1Ply(moves: myMoves, state: myState,
-                                               player: player, cube: cube, cubeOwner: cubeOwner) {
-                        ply3Sum   += w * leafBest.equity
-                        ply3Total += w
-                    }
-                }
-
-                let ply3Equity = ply3Total > 0 ? ply3Sum / ply3Total : 0
-                let sw = Float(sample.weight)
-                weightedEquitySum   += sw * ply3Equity
-                weightedEquityTotal += sw
-            }
-
-            let finalEquity = weightedEquityTotal > 0 ? weightedEquitySum / weightedEquityTotal : 0
-            if finalEquity > bestFinalEquity {
-                bestFinalEquity = finalEquity
-                bestMove = candidate.move
-            }
+        var choice = survivors.first!.move
+        var bestEq = -Float.greatestFiniteMagnitude
+        for cand in survivors {
+            guard let child = expectedProbs(cand.next, sideToRoll: opponent, plies: plies - 1)
+            else { continue }
+            let eq = equity(of: swap.map { child[$0] })
+            if eq > bestEq { bestEq = eq; choice = cand.move }
         }
-
-        return bestMove
+        return choice
     }
 
     // Evaluates the current position equity from state.currentPlayer's perspective.

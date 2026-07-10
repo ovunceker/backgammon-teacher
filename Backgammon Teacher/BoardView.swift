@@ -420,7 +420,28 @@ struct BoardView: View {
                     .foregroundStyle(PC.dim)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                panelButton("CLEAR", tint: PC.red)   { vm.clearSetupBoard() }
+                HStack(spacing: 6) {
+                    panelButton("DEFAULT", tint: PC.brown) { vm.resetToDefaultBoard() }
+                    panelButton("CLEAR",   tint: PC.red)   { vm.clearSetupBoard() }
+                }
+                Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
+                Toggle(isOn: Binding(get: { vm.useFixedDice }, set: { vm.useFixedDice = $0 })) {
+                    Text("FIXED DICE")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(PC.cream)
+                        .kerning(1)
+                }
+                .toggleStyle(SwitchToggleStyle(tint: PC.brown))
+                if vm.useFixedDice {
+                    HStack(spacing: 8) {
+                        dieSelector(value: Binding(get: { vm.setupDie1 }, set: { vm.setupDie1 = $0 }))
+                        Text("—")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                        dieSelector(value: Binding(get: { vm.setupDie2 }, set: { vm.setupDie2 = $0 }))
+                    }
+                    .frame(maxWidth: .infinity)
+                }
                 Rectangle().fill(PC.cream.opacity(0.10)).frame(height: 1)
                 panelLabel("START AS")
                 panelButton("WHITE", tint: PC.tan)   { vm.startFromSetup(as: .white) }
@@ -554,6 +575,27 @@ struct BoardView: View {
                 .overlay(RoundedRectangle(cornerRadius: 8)
                     .stroke(tint.opacity(0.40), lineWidth: 1))
         )
+    }
+
+    private func dieSelector(value: Binding<Int>) -> some View {
+        HStack(spacing: 0) {
+            Button { value.wrappedValue = max(1, value.wrappedValue - 1) } label: {
+                Image(systemName: "minus")
+                    .font(.system(size: 10, weight: .bold))
+                    .frame(width: 28, height: 28)
+            }
+            Text("\(value.wrappedValue)")
+                .font(.system(size: 16, weight: .black, design: .rounded))
+                .frame(width: 28)
+            Button { value.wrappedValue = min(6, value.wrappedValue + 1) } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 10, weight: .bold))
+                    .frame(width: 28, height: 28)
+            }
+        }
+        .foregroundStyle(PC.cream)
+        .background(RoundedRectangle(cornerRadius: 6).fill(PC.bg.opacity(0.6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(PC.cream.opacity(0.20), lineWidth: 1)))
     }
 
     private func setupColorButton(_ color: Player, label: String) -> some View {
@@ -1053,6 +1095,30 @@ private struct SettingsView: View {
                     }
                     Spacer()
                     Toggle("", isOn: $vm.coachMode)
+                        .tint(PC.green)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("AI DOUBLING")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("Allow the AI to offer and respond to doubling cube decisions")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.aiDoublingEnabled)
                         .tint(PC.green)
                         .labelsHidden()
                 }

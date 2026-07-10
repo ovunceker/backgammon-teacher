@@ -52,6 +52,12 @@ final class GameViewModel {
         didSet { UserDefaults.standard.set(coachMode, forKey: "coachMode") }
     }
 
+    // Default true: if key absent treat as enabled; if key present use stored value.
+    var aiDoublingEnabled: Bool = (UserDefaults.standard.object(forKey: "aiDoublingEnabled") == nil)
+        || UserDefaults.standard.bool(forKey: "aiDoublingEnabled") {
+        didSet { UserDefaults.standard.set(aiDoublingEnabled, forKey: "aiDoublingEnabled") }
+    }
+
     // MARK: Doubling cube + turn-start gate (active only when advancedMode is on)
     private(set) var cubeValue: Int = 1
     private(set) var cubeOwner: Player? = nil   // nil = centred
@@ -76,6 +82,9 @@ final class GameViewModel {
 
     var isSetupMode: Bool = false
     var setupColor: Player = .white
+    var useFixedDice: Bool = false
+    var setupDie1: Int = 1
+    var setupDie2: Int = 6
 
     // All points the selected checker can reach — single die, either die, or both dice on
     // the same checker (e.g. rolling 2+5 shows destinations 2 steps, 5 steps, and 7 steps away).
@@ -327,6 +336,10 @@ final class GameViewModel {
         state = .makeEmpty()
     }
 
+    func resetToDefaultBoard() {
+        state = .makeInitial()
+    }
+
     func startFromSetup(as player: Player) {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
@@ -335,7 +348,31 @@ final class GameViewModel {
         state.currentPlayer = player
         isSetupMode = false
         dice = nil; selectedPoint = nil; allLegalMoves = []; history = []; pendingEndTurn = false; flightInfo = nil
-        startTurn()
+        if useFixedDice {
+            rollFixedDice()
+        } else {
+            startTurn()
+        }
+    }
+
+    private func rollFixedDice() {
+        let d = Dice(setupDie1, setupDie2)
+        dice = d
+        diceRollID += 1
+        allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
+        if allLegalMoves.isEmpty {
+            noMovesAvailable = true
+            if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
+            return
+        }
+        if state.barCount(for: state.currentPlayer) > 0 {
+            selectedPoint = state.currentPlayer.barPoint
+        }
+        if state.currentPlayer == .black {
+            scheduleAIPlay(delay: 900)
+        } else {
+            scheduleAutoPlay(delay: 1500)
+        }
     }
 
     func offerDouble() {
@@ -407,7 +444,11 @@ final class GameViewModel {
             return
         }
         allLegalMoves = MoveGenerator.legalMoves(for: state, dice: d)
-        if allLegalMoves.isEmpty { noMovesAvailable = true; scheduleAutoEnd(); return }
+        if allLegalMoves.isEmpty {
+            noMovesAvailable = true
+            if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
+            return
+        }
         if state.barCount(for: state.currentPlayer) > 0 {
             selectedPoint = state.currentPlayer.barPoint
         }
@@ -453,16 +494,26 @@ final class GameViewModel {
     }
 
     // Black decides whether to offer a double before rolling.
+    // Uses equity (not pWin) because the model's absolute win probabilities are
+    // colour-biased: BLACK's equity at the neutral starting position is ~0.92.
+    // Doubling window: equity in [1.5, 2.5] = clearly ahead but not playing for gammon.
+    // recalibrate lower bound after retrain when colour bias is eliminated.
     private func scheduleAICubeDecision() {
         autoPlayTask?.cancel()
         autoPlayTask = Task {
             try? await Task.sleep(for: .milliseconds(700))
             guard !Task.isCancelled else { return }
-            let canOffer = (cubeOwner == nil || cubeOwner == .black) && cubeValue < 64
+            let canOffer = aiDoublingEnabled
+                && (cubeOwner == nil || cubeOwner == .black)
+                && cubeValue < 64
             if canOffer,
-               let equity = AIPlayer.rawEquity(for: state, cube: cubeValue, cubeOwner: cubeOwner),
-               equity > 0.5 {
-                pendingDouble = true   // white (human) decides to accept or drop
+               let (equity, _) = AIPlayer.equityAndProbs(for: state, player: .black,
+                                                         cube: cubeValue, cubeOwner: cubeOwner) {
+                if equity >= 1.5 && equity <= 2.5 {
+                    pendingDouble = true   // white (human) decides to accept or drop
+                } else {
+                    rollDice()
+                }
             } else {
                 rollDice()
             }
@@ -470,13 +521,21 @@ final class GameViewModel {
     }
 
     // Black auto-responds to white's double offer.
+    // Drop when BLACK's equity is below 0.3 — clearly losing even accounting for
+    // the model's colour bias (neutral ≈ 0.92, so 0.3 means genuinely behind).
+    // recalibrate after retrain.
     private func scheduleAICubeResponse() {
         autoPlayTask?.cancel()
         autoPlayTask = Task {
             try? await Task.sleep(for: .milliseconds(1000))
             guard !Task.isCancelled else { return }
-            let equity = AIPlayer.rawEquity(for: state, cube: cubeValue, cubeOwner: cubeOwner) ?? 0
-            let drops = equity > 0.75
+            let drops: Bool
+            if let (equity, _) = AIPlayer.equityAndProbs(for: state, player: .black,
+                                                         cube: cubeValue, cubeOwner: cubeOwner) {
+                drops = equity < 0.3
+            } else {
+                drops = false
+            }
             pendingDouble = false
             cubeResponseMessage = drops ? "Denied" : "Accepted"
             try? await Task.sleep(for: .milliseconds(1500))

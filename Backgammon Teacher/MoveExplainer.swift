@@ -70,7 +70,7 @@ struct MoveExplainer {
         for move in moves {
             var next = preTurnState
             for step in move { next = next.applying(step) }
-            guard let (eq, probs) = AIPlayer.equityAndProbs(for: next, player: player) else { continue }
+            guard let (eq, probs) = AIPlayer.equityAndProbsAfterMove(for: next, mover: player) else { continue }
 
             if boardsMatch(next, playerFinalState) {
                 playerResult = (eq, probs)

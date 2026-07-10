@@ -1,14 +1,10 @@
 """
-Standalone 1M-game TD-Gammon trainer.
+Standalone TD-Gammon trainer with TD(λ) and batched semi-gradient updates.
 
-Reuses the validated CPU game logic in bg_worker.py (self-play workers) and runs
-the master TD updates on the CPU — benchmarked 3x faster than MPS for this tiny
-200->160->6 net, because single-sample updates are dominated by GPU launch
-overhead, not matrix math.
-
-Learning math is IDENTICAL to the notebook's train_parallel (single-sample TD
-updates replayed on the master net). Adds: live ETA, wall-clock finish estimate,
-and crash-safe periodic checkpointing.
+Workers self-play and ship raw trajectories (states + terminal target). The master
+computes forward-view TD(λ) targets fresh on the current weights, does one batched
+SGD step per game, and applies gradient clipping + linear lr decay. Architecture
+stays 200→160→6 throughout.
 
 Run:
     python -u train_1m.py            # 1,000,000 games, sensible defaults
@@ -19,6 +15,7 @@ Resume from the last checkpoint:
 """
 import argparse
 import copy
+import json
 import os
 import queue
 import random
@@ -33,6 +30,10 @@ import torch.nn as nn
 # Master runs on CPU (proven faster than MPS for single-sample updates here).
 DEVICE = torch.device("cpu")
 torch.set_num_threads(1)  # keep the master thread lean; cores go to workers
+
+# Perspective swap: opponent's [win, gwin, bgwin, loss, gloss, bgloss] → my view.
+# Vectors SWAP (my_vec = opp_vec[_SWAP]); scalar equity just negates.
+_SWAP = torch.tensor([3, 4, 5, 0, 1, 2], device=DEVICE)
 
 # Ensure a fresh bg_worker is importable (workers re-import it under spawn).
 if "bg_worker" in sys.modules:
@@ -56,37 +57,73 @@ class TDGammon(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-    def td_update(self, v, delta):
-        if not isinstance(delta, torch.Tensor):
-            delta = torch.tensor(delta, dtype=torch.float32, device=DEVICE)
-        self.optimizer.zero_grad()
-        loss = -(delta.detach() * v).sum()
-        loss.backward()
-        self.optimizer.step()
+
+# --------------------------------------------------------------------------- #
+# TD(λ) targets — forward view with alternating perspective.
+# --------------------------------------------------------------------------- #
+def lambda_returns(values, terminal_target, lam):
+    """Compute forward-view TD(λ) return targets for a single trajectory.
+
+    values          : [T, 6] detached net outputs, alternating perspectives.
+    terminal_target : [6] outcome vector from states[-1]'s perspective.
+
+    Recurrence (perspective alternates each step, so swap at each level):
+        G[T-1] = terminal_target
+        G[t]   = ((1-λ) * values[t+1] + λ * G[t+1])[SWAP]
+
+    λ=0 → TD(0) (pure bootstrap); λ=1 → Monte-Carlo (pure outcome).
+    Tesauro used λ≈0.7, blending both.
+    """
+    T = values.shape[0]
+    G = torch.empty_like(values)
+    G[T - 1] = terminal_target
+    for t in range(T - 2, -1, -1):
+        G[t] = ((1.0 - lam) * values[t + 1] + lam * G[t + 1])[_SWAP]
+    return G
+
+
+def train_on_game(net, states_np, terminal_np, lam, clip):
+    """One batched semi-gradient step for a single trajectory.
+
+    Targets are computed fresh on the current weights (no staleness).
+    Returns the mean absolute TD residual for telemetry.
+    """
+    x = torch.from_numpy(states_np)                         # [T, 200]
+    v = net(x)                                              # [T, 6], with grad
+    G = lambda_returns(v.detach(), torch.from_numpy(terminal_np), lam)
+    # Sum over steps (not mean): each position gets its full gradient, matching
+    # the per-position update magnitude of classic online TD. A mean here scales
+    # the effective lr by 1/T (~1/50) and the net never leaves its random init.
+    loss = 0.5 * ((G - v) ** 2).sum(dim=1).sum()
+    net.optimizer.zero_grad()
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(net.parameters(), clip)
+    net.optimizer.step()
+    return float((G - v.detach()).abs().mean().item())
 
 
 # --------------------------------------------------------------------------- #
-# Evaluation — current net (WHITE) vs a past snapshot (BLACK), 1-ply, CPU.
-# Reuses bw's game logic so it stays identical to the trained dynamics.
+# Evaluation
 # --------------------------------------------------------------------------- #
 def win_rate_vs_snapshot(net, snapshot, n_games=500):
-    """Current net (WHITE) vs a past snapshot (BLACK), cubeless — both sides just
-    alternate rolls and moves until game_outcome returns a winner."""
+    """Current net vs snapshot from eval_every games ago. Alternates colours
+    to cancel the model's residual colour bias — measures quality only."""
     net.eval(); snapshot.eval()
     wins = 0
     with torch.no_grad():
-        for _ in range(n_games):
+        for g in range(n_games):
+            net_color = "WHITE" if g % 2 == 0 else "BLACK"
+            snap_color = "BLACK" if g % 2 == 0 else "WHITE"
             board, player = bw.initial_board(), "WHITE"
             for _ in range(10_000):
-                cur = net if player == "WHITE" else snapshot
+                cur = net if player == net_color else snapshot
                 dice = bw.roll_dice()
-                mv = bw._choose_1ply_cpu(board, dice, player, cur, 1, None)
+                mv = bw._choose_1ply_cpu(board, dice, player, cur)
                 if mv is not None:
                     board = bw.apply_move(board, mv, player)
                 w, _ = bw.game_outcome(board)
                 if w is not None:
-                    if w == "WHITE":
-                        wins += 1
+                    wins += w == net_color
                     break
                 player = "BLACK" if player == "WHITE" else "WHITE"
     net.train()
@@ -105,7 +142,7 @@ def win_rate_vs_random(net, n_games=500):
             for _ in range(10_000):
                 dice = bw.roll_dice()
                 if player == net_color:
-                    mv = bw._choose_1ply_cpu(board, dice, player, net, 1, None)
+                    mv = bw._choose_1ply_cpu(board, dice, player, net)
                 else:
                     legal = bw.generate_legal_moves(board, dice, player)
                     mv = random.choice(legal) if legal else None
@@ -131,20 +168,30 @@ def fmt_dur(sec):
 def atomic_save(net, path):
     tmp = path + ".tmp"
     torch.save(net.state_dict(), tmp)
-    os.replace(tmp, path)  # atomic on the same filesystem — never a half-written file
+    os.replace(tmp, path)  # atomic on the same filesystem
+
+
+def save_provenance(path, total, lam, lr, lr_final, clip, hidden_size):
+    meta = {
+        "total_games": total, "lam": lam, "lr": lr, "lr_final": lr_final,
+        "clip": clip, "hidden_size": hidden_size,
+        "engine": "td_lambda_batched_v3_sumloss",
+        "saved_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    with open(path + ".json", "w") as f:
+        json.dump(meta, f, indent=2)
 
 
 def log(msg):
-    # Single writer: print to stdout only. The shell redirect owns the log file,
-    # so tracebacks (stderr) and progress land in one clean stream.
+    # Single writer: print to stdout only. Shell redirect owns the log file.
     print(msg, flush=True)
 
 
 # --------------------------------------------------------------------------- #
 # Training
 # --------------------------------------------------------------------------- #
-def train_parallel(n_games, lr, hidden_size, n_workers, n_batch,
-                   print_every, eval_every, snapshot_every, checkpoint_every,
+def train_parallel(n_games, lr, lr_final, lam, clip, hidden_size, n_workers, n_batch,
+                   print_every, eval_every, checkpoint_every,
                    ckpt_path, resume):
     bw_module = bw
 
@@ -179,11 +226,14 @@ def train_parallel(n_games, lr, hidden_size, n_workers, n_batch,
 
     t0 = time.time()
     total = 0
+    total_pos = 0
+    resid_ema = 0.0
     log(f"=== TD-Gammon training: {n_games:,} games | {n_workers} workers x "
-        f"{n_batch}/batch | master=CPU | started {datetime.now():%Y-%m-%d %H:%M} ===")
-    log(f"{'Games':>10}  {'Prog':>6}  {'g/s':>7}  {'Elapsed':>9}  "
-        f"{'ETA':>9}  {'Finish~':>8}  {'vsSnap':>7}  {'vsRand':>7}")
-    log("-" * 84)
+        f"{n_batch}/batch | lam={lam} lr={lr}→{lr_final} clip={clip} | "
+        f"master=CPU | started {datetime.now():%Y-%m-%d %H:%M} ===")
+    log(f"{'Games':>10}  {'Prog':>6}  {'g/s':>7}  {'plies':>6}  {'pos/s':>7}  {'Elapsed':>9}  "
+        f"{'ETA':>9}  {'Finish~':>8}  {'resid':>8}  {'vsSnap':>7}  {'vsRand':>7}")
+    log("-" * 110)
 
     last_ckpt = 0
     while total < n_games:
@@ -204,22 +254,31 @@ def train_parallel(n_games, lr, hidden_size, n_workers, n_batch,
             task_queues[wid].put((n_batch, get_weights()))
             continue
 
-        # Replay worker experience through the master net (single-sample TD).
+        # λ-return batched update: one backward per game, targets computed fresh.
         net.train()
-        for enc, delta in payload:
-            v = net(torch.tensor(enc, dtype=torch.float32, device=DEVICE))
-            net.td_update(v, torch.tensor(delta, dtype=torch.float32, device=DEVICE))
+        for states_np, terminal_np in payload:
+            if states_np.ndim != 2 or states_np.shape[1] != 200 or terminal_np.shape != (6,):
+                raise RuntimeError(
+                    f"Worker payload shape mismatch: got states{states_np.shape} "
+                    f"terminal{terminal_np.shape}, expected states[T,200] terminal[6]. "
+                    f"bg_worker.py and train_1m.py are out of sync — check _play_games."
+                )
+            total_pos += states_np.shape[0]
+            r = train_on_game(net, states_np, terminal_np, lam, clip)
+            resid_ema = 0.999 * resid_ema + 0.001 * r
 
-        task_queues[wid].put((n_batch, get_weights()))  # keep the worker busy
+        task_queues[wid].put((n_batch, get_weights()))
 
         prev = total
-        total += n_batch
+        total += len(payload)   # dropped games (10k cap) don't count
 
-        if total // snapshot_every > prev // snapshot_every:
-            snapshot = copy.deepcopy(net)
+        # Linear lr annealing — updated after each batch.
+        cur_lr = lr + (lr_final - lr) * min(total / n_games, 1.0)
+        net.optimizer.param_groups[0]["lr"] = cur_lr
 
         if total - last_ckpt >= checkpoint_every:
             atomic_save(net, ckpt_path)
+            save_provenance(ckpt_path, total, lam, lr, lr_final, clip, hidden_size)
             last_ckpt = total
 
         if total // print_every > prev // print_every:
@@ -229,15 +288,22 @@ def train_parallel(n_games, lr, hidden_size, n_workers, n_batch,
             finish = (datetime.now() + timedelta(seconds=eta)).strftime("%H:%M")
             pct = min(total / n_games * 100, 100.0)
             if total // eval_every > prev // eval_every:
+                # vsSnap: compare current net vs snapshot from eval_every games ago.
+                # Snapshot is updated AFTER this comparison so vsSnap is always meaningful.
                 wr_s = f"{win_rate_vs_snapshot(net, snapshot):6.1%}"
-                rr_s = f"{win_rate_vs_random(net):6.1%}"
+                rr = win_rate_vs_random(net)
+                rr_s = f"{rr:6.1%}"
+                snapshot = copy.deepcopy(net)   # update AFTER eval
             else:
                 wr_s = f"{'—':>6}"
                 rr_s = f"{'—':>6}"
-            log(f"{total:>10,}  {pct:>5.1f}%  {gps:>7.1f}  {fmt_dur(elapsed):>9}  "
-                f"{fmt_dur(eta):>9}  {finish:>8}  {wr_s:>7}  {rr_s:>7}")
+            log(f"{total:>10,}  {pct:>5.1f}%  {gps:>7.1f}  "
+                f"{total_pos / max(total, 1):>6.1f}  {total_pos / elapsed:>7.0f}  "
+                f"{fmt_dur(elapsed):>9}  "
+                f"{fmt_dur(eta):>9}  {finish:>8}  {resid_ema:>8.5f}  {wr_s:>7}  {rr_s:>7}")
 
     atomic_save(net, ckpt_path)
+    save_provenance(ckpt_path, total, lam, lr, lr_final, clip, hidden_size)
     for q in task_queues:
         q.put(None)
     for p in workers:
@@ -245,26 +311,32 @@ def train_parallel(n_games, lr, hidden_size, n_workers, n_batch,
         if p.is_alive():
             p.terminate()
 
-    log("-" * 74)
-    log(f"Done. {total:,} games in {fmt_dur(time.time() - t0)}. Saved {ckpt_path}")
+    log("-" * 93)
+    log(f"Done. {total:,} games in {fmt_dur(time.time() - t0)}. Saved {ckpt_path}.")
     return net
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n_games", type=int, default=1_000_000)
-    ap.add_argument("--lr", type=float, default=0.01)
-    ap.add_argument("--hidden", type=int, default=160)
-    ap.add_argument("--workers", type=int, default=7)
-    ap.add_argument("--batch", type=int, default=8)
-    ap.add_argument("--print_every", type=int, default=5_000)
-    ap.add_argument("--eval_every", type=int, default=100_000)
-    ap.add_argument("--snapshot_every", type=int, default=100_000)
-    ap.add_argument("--checkpoint_every", type=int, default=25_000)
-    ap.add_argument("--ckpt", type=str, default="tdgammon.pt")
-    ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--n_games",          type=int,   default=1_000_000)
+    ap.add_argument("--lr",               type=float, default=0.01)
+    ap.add_argument("--lr_final",         type=float, default=0.005)
+    # λ=1.0 (pure Monte-Carlo targets) is load-bearing here: with λ<1 the
+    # bootstrap term anchors targets to the net's own race-biased values,
+    # self-play stops hitting within ~2k games, and the bar inputs never get
+    # training data (measured: vsRand decays to <50%; λ=1.0 hits 97% by 4k games).
+    ap.add_argument("--lam",              type=float, default=1.0)
+    ap.add_argument("--clip",             type=float, default=20.0)
+    ap.add_argument("--hidden",           type=int,   default=160)
+    ap.add_argument("--workers",          type=int,   default=9)
+    ap.add_argument("--batch",            type=int,   default=4)
+    ap.add_argument("--print_every",      type=int,   default=5_000)
+    ap.add_argument("--eval_every",       type=int,   default=100_000)
+    ap.add_argument("--checkpoint_every", type=int,   default=25_000)
+    ap.add_argument("--ckpt",             type=str,   default="tdgammon.pt")
+    ap.add_argument("--resume",           action="store_true")
     a = ap.parse_args()
 
-    train_parallel(a.n_games, a.lr, a.hidden, a.workers, a.batch,
-                   a.print_every, a.eval_every, a.snapshot_every,
+    train_parallel(a.n_games, a.lr, a.lr_final, a.lam, a.clip, a.hidden,
+                   a.workers, a.batch, a.print_every, a.eval_every,
                    a.checkpoint_every, a.ckpt, a.resume)

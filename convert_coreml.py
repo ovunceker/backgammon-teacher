@@ -9,6 +9,14 @@ import numpy as np
 import torch
 
 print("step 1: load weights", flush=True)
+import json, pathlib
+prov_path = pathlib.Path("tdgammon.pt.json")
+if prov_path.exists():
+    prov = json.loads(prov_path.read_text())
+    print(f"  provenance: {prov}", flush=True)
+else:
+    print("  WARNING: tdgammon.pt.json not found — checkpoint predates provenance "
+          "tracking; engine version unknown.", flush=True)
 sd = torch.load("tdgammon.pt", map_location="cpu")
 W1 = sd["net.0.weight"].numpy().astype(np.float32)   # (160,200)
 b1 = sd["net.0.bias"].numpy().astype(np.float32)     # (160,)
@@ -35,6 +43,7 @@ def prog(x):
 
 print("step 4: convert to mlprogram", flush=True)
 mlmodel = ct.convert(prog, convert_to="mlprogram",
+                     compute_precision=ct.precision.FLOAT32,  # exact parity; FP16 default wobbles ~0.002
                      inputs=[ct.TensorType(name="x", shape=(1, 200))])
 
 print("step 5: save", flush=True)

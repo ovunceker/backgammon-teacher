@@ -60,7 +60,7 @@ struct BoardEncoder {
         var b = [Int](repeating: 0, count: 26)
         b[0]  = board[25]
         b[25] = board[0]
-        for i in 1...24 { b[i] = -board[26 - i] }
+        for i in 1...24 { b[i] = -board[25 - i] }
         return b
     }
 }

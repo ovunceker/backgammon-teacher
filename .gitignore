@@ -31,7 +31,8 @@ training.log
 smoke.log
 *.pt.tmp
 
-# Model / CoreML backups (local only)
+# Model / CoreML backups + training intermediates (local only)
 TDGammon_mlpackage_*_backup/
 tdgammon_*_backup.pt
 tdgammon_broken.pt
+tdgammon_best.pt
