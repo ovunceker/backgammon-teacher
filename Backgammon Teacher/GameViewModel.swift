@@ -39,6 +39,8 @@ final class GameViewModel {
     private var isAutoPlayInProgress: Bool = false
     private(set) var lastAnalysis: MoveAnalysis? = nil
     private var analysisTask: Task<Void, Never>? = nil
+    private(set) var preTurnEquity: Float? = nil
+    private var preTurnEquityTask: Task<Void, Never>? = nil
     private(set) var openingDice: (white: Int, black: Int)? = nil
     private(set) var openingRollAnimID: Int = 0
     private var openingTask: Task<Void, Never>? = nil
@@ -214,6 +216,15 @@ final class GameViewModel {
         let skipCube = openingDiceAsFirst && pendingOpeningDice != nil
         if advancedMode && state.currentPlayer == .white && !skipCube {
             pendingRoll = true
+            if coachMode {
+                let snap = state
+                preTurnEquityTask?.cancel()
+                preTurnEquityTask = Task.detached(priority: .userInitiated) { [weak self] in
+                    let eq = AIPlayer.equityAndProbs(for: snap, player: .white)?.equity
+                    guard !Task.isCancelled else { return }
+                    await MainActor.run { [weak self] in self?.preTurnEquity = eq }
+                }
+            }
         } else if advancedMode && state.currentPlayer == .black && !skipCube {
             scheduleAICubeDecision()
         } else {
@@ -227,6 +238,7 @@ final class GameViewModel {
     func rollDice() {
         guard canRoll else { return }
         pendingRoll = false
+        preTurnEquityTask?.cancel(); preTurnEquityTask = nil; preTurnEquity = nil
         let d: Dice
         let usingOpeningValues: Bool
         if let (d1, d2) = pendingOpeningDice {
@@ -294,6 +306,7 @@ final class GameViewModel {
     func undoStep() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); analysisTask = nil; lastAnalysis = nil
         noMovesAvailable = false
         flightInfo = nil; dragSource = nil; dragPosition = nil
         if !moveHistory.isEmpty { moveHistory.removeLast() }
@@ -378,6 +391,7 @@ final class GameViewModel {
     func newGame() {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         stopTurnTimer(); whiteGameSeconds = 600; blackGameSeconds = 600; turnElapsedSeconds = 0
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
@@ -392,6 +406,7 @@ final class GameViewModel {
     func rematch() {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         stopTurnTimer(); whiteGameSeconds = 600; blackGameSeconds = 600; turnElapsedSeconds = 0
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
@@ -406,6 +421,7 @@ final class GameViewModel {
     func enterSetupMode() {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         cubeValue = 1; cubeOwner = nil; pendingDouble = false; cubeResponseMessage = nil
         flightInfo = nil
@@ -438,6 +454,7 @@ final class GameViewModel {
     func startFromSetup(as player: Player) {
         autoEndTask?.cancel(); autoPlayTask?.cancel(); openingTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         openingDice = nil; pendingOpeningDice = nil
         noMovesAvailable = false; resignedWinner = nil; droppedWinner = nil; pendingRoll = false
         state.currentPlayer = player
@@ -488,6 +505,7 @@ final class GameViewModel {
     func dropDouble() {
         stopTurnTimer()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         let winner = state.currentPlayer  // offerer wins when opponent drops
         let pts = cubeValue
         if winner == .white { whiteScore += pts } else { blackScore += pts }
@@ -503,6 +521,7 @@ final class GameViewModel {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
         analysisTask?.cancel(); lastAnalysis = nil; analysisTask = nil
+        preTurnEquityTask?.cancel(); preTurnEquity = nil; preTurnEquityTask = nil
         noMovesAvailable = false; pendingRoll = false
         let winner = state.currentPlayer.opponent
         if winner == .white { whiteScore += cubeValue } else { blackScore += cubeValue }
@@ -528,21 +547,6 @@ final class GameViewModel {
                 return
             }
         }
-        analysisTask?.cancel()
-        analysisTask = nil
-        if coachMode, let (preTurnState, preTurnDice) = history.first, state.winner == nil {
-            let playerFinal = state
-            lastAnalysis = nil
-            analysisTask = Task.detached(priority: .userInitiated) { [weak self] in
-                let result = MoveExplainer.analyze(
-                    preTurnState: preTurnState,
-                    dice: preTurnDice,
-                    playerFinalState: playerFinal
-                )
-                guard !Task.isCancelled else { return }
-                await MainActor.run { [weak self] in self?.lastAnalysis = result }
-            }
-        }
         endTurn()
     }
 
@@ -555,7 +559,25 @@ final class GameViewModel {
             return
         }
         guard let d = dice, !d.isDone else {
-            if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
+            if state.currentPlayer == .black {
+                scheduleAutoEnd()
+            } else {
+                if coachMode, let (preTurnState, preTurnDice) = history.first, state.winner == nil {
+                    let playerFinal = state
+                    lastAnalysis = nil
+                    analysisTask?.cancel()
+                    analysisTask = Task.detached(priority: .userInitiated) { [weak self] in
+                        let result = MoveExplainer.analyze(
+                            preTurnState: preTurnState,
+                            dice: preTurnDice,
+                            playerFinalState: playerFinal
+                        )
+                        guard !Task.isCancelled else { return }
+                        await MainActor.run { [weak self] in self?.lastAnalysis = result }
+                    }
+                }
+                pendingEndTurn = true
+            }
             return
         }
         allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
@@ -714,6 +736,8 @@ final class GameViewModel {
     private func endTurn() {
         autoEndTask?.cancel()
         autoPlayTask?.cancel()
+        analysisTask?.cancel(); analysisTask = nil; lastAnalysis = nil
+        preTurnEquityTask?.cancel(); preTurnEquityTask = nil; preTurnEquity = nil
         noMovesAvailable = false
         pendingEndTurn = false; pendingRoll = false
         dice = nil; allLegalMoves = []; selectedPoint = nil; history = []; moveHistory = []; flightInfo = nil

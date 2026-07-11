@@ -748,7 +748,16 @@ final class MoveExplainerTests: XCTestCase {
             severity: severity,
             reasons: reasons,
             playerProbs: playerProbs,
-            bestProbs: bestProbs
+            bestProbs: bestProbs,
+            preTurnState: .makeInitial(),
+            playerFinalState: .makeInitial(),
+            bestFinalState: .makeInitial(),
+            dice: Dice(1, 2),
+            playerShotsAgainstBlots: 0,
+            bestShotsAgainstBlots: 0,
+            playerShotsByZone: [0, 0, 0, 0],
+            topOpponentResponses: [],
+            topAlternatives: []
         )
     }
 }
