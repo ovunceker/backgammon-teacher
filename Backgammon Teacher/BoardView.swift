@@ -1279,39 +1279,6 @@ private struct SettingsView: View {
                             .stroke(PC.cream.opacity(0.08), lineWidth: 1))
                 )
 
-                // COACH SETTINGS section
-                Text("COACH SETTINGS")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(PC.dim)
-                    .kerning(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 14)
-                    .padding(.bottom, 8)
-
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("COACH MODE")
-                            .font(.system(size: 12, weight: .black, design: .rounded))
-                            .foregroundStyle(PC.cream)
-                            .kerning(1.5)
-                        Text("After each turn, shows how the computer evaluates your move and explains mistakes")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(PC.dim)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer()
-                    Toggle("", isOn: $vm.coachMode)
-                        .tint(PC.green)
-                        .labelsHidden()
-                }
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.black.opacity(0.25))
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
-                )
-
                 // Street Rules section
                 Text("STREET RULES")
                     .font(.system(size: 11, weight: .black, design: .rounded))
@@ -1383,6 +1350,39 @@ private struct SettingsView: View {
                     Spacer()
                     Toggle("", isOn: $vm.regularTimerEnabled)
                         .tint(PC.brown)
+                        .labelsHidden()
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.25))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(PC.cream.opacity(0.08), lineWidth: 1))
+                )
+
+                // COACH SETTINGS section
+                Text("COACH SETTINGS")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(PC.dim)
+                    .kerning(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 14)
+                    .padding(.bottom, 8)
+
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("COACH MODE")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .foregroundStyle(PC.cream)
+                            .kerning(1.5)
+                        Text("After each turn, shows how the computer evaluates your move and explains mistakes")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PC.dim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $vm.coachMode)
+                        .tint(PC.green)
                         .labelsHidden()
                 }
                 .padding(14)

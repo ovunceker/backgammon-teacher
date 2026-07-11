@@ -1,10 +1,10 @@
 {
-  "total_games": 600000,
+  "total_games": 275000,
   "lam": 1.0,
   "lr": 0.01,
   "lr_final": 0.005,
   "clip": 20.0,
   "hidden_size": 160,
   "engine": "td_lambda_batched_v3_sumloss",
-  "saved_at": "2026-07-10T08:17:15"
+  "saved_at": "2026-07-10T23:46:47"
 }

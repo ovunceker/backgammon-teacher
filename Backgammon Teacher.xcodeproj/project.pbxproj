@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		5A80FF192FCB9AD900550E13 /* TDGammon.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 5A80FF182FCB9AD900550E13 /* TDGammon.mlpackage */; };
+		5A80FF1B2FCB9AD900550E13 /* TDGammon_875k.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 5A80FF1A2FCB9AD900550E13 /* TDGammon_875k.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5A0EE50B2FC224DE009BC692 /* Backgammon Teacher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Backgammon Teacher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A7F3AB82FC2264E00D7B06B /* Backgammon Teacher.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "Backgammon Teacher.xcodeproj"; sourceTree = "<group>"; };
 		5A80FF182FCB9AD900550E13 /* TDGammon.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = TDGammon.mlpackage; sourceTree = "<group>"; };
+		5A80FF1A2FCB9AD900550E13 /* TDGammon_875k.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = TDGammon_875k.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +41,7 @@
 			isa = PBXGroup;
 			children = (
 				5A80FF182FCB9AD900550E13 /* TDGammon.mlpackage */,
+				5A80FF1A2FCB9AD900550E13 /* TDGammon_875k.mlpackage */,
 				5A0EE50D2FC224DE009BC692 /* Backgammon Teacher */,
 				5A0EE50C2FC224DE009BC692 /* Products */,
 			);
@@ -137,7 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A80FF192FCB9AD900550E13 /* TDGammon.mlpackage in Sources */,
+				5A80FF1B2FCB9AD900550E13 /* TDGammon_875k.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

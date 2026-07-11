@@ -561,7 +561,7 @@ final class GameViewModel {
         allLegalMoves = filterVurKac(MoveGenerator.legalMoves(for: state, dice: d), from: state)
         if allLegalMoves.isEmpty {
             noMovesAvailable = true
-            if state.currentPlayer == .black { scheduleAutoEnd() } else { pendingEndTurn = true }
+            scheduleAutoEnd()
             return
         }
         if state.barCount(for: state.currentPlayer) > 0 {

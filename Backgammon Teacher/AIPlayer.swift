@@ -4,8 +4,8 @@ import CoreML
 // Uses the TDGammon CoreML model to pick the best legal move for a given board state.
 struct AIPlayer {
 
-    private static let model: TDGammon? = {
-        try? TDGammon(configuration: MLModelConfiguration())
+    private static let model: TDGammon_875k? = {
+        try? TDGammon_875k(configuration: MLModelConfiguration())
     }()
 
     // Decision depth for the AI's move search (PLAY TIME ONLY; training stays 0-ply).
@@ -123,6 +123,26 @@ struct AIPlayer {
         return acc.map { $0 / 36 }
     }
 
+    // When black is safely bearing off (no white pieces in black's home board or on
+    // white's bar), restrict candidates to moves that bear off at least one checker.
+    private static func bearOffFiltered(_ moves: [Move], state: BoardState) -> [Move] {
+        guard state.currentPlayer == .black else { return moves }
+        // Black must have all checkers on points 19-24 (none at 1-18 or on black's bar).
+        guard (1...18).allSatisfy({ state.points[$0] >= 0 }),
+              state.blackBar == 0
+        else { return moves }
+        // White must have no checkers in black's home (19-24) or on white's bar.
+        guard (19...24).allSatisfy({ state.points[$0] <= 0 }),
+              state.whiteBar == 0
+        else { return moves }
+        // Tier 1: moves whose first step immediately bears off.
+        let immediate = moves.filter { $0.first?.to == 25 }
+        if !immediate.isEmpty { return immediate }
+        // Tier 2: moves that bear off in some later step (die-order constraint).
+        let anyBearOff = moves.filter { move in move.contains { $0.to == 25 } }
+        return anyBearOff.isEmpty ? moves : anyBearOff
+    }
+
     // n-ply expectiminimax move choice (default `searchPlies`). Pre-scores every
     // candidate with a 1-ply static eval, keeps a survivor set (top K plus any within
     // 0.08 equity of the best), then deep-searches only the survivors. plies <= 1
@@ -130,6 +150,7 @@ struct AIPlayer {
     static func bestMove(for state: BoardState, moves: [Move], cube: Int = 1, cubeOwner: Player? = nil) -> Move? {
         guard model != nil, !moves.isEmpty else { return nil }
         let player = state.currentPlayer
+        let moves = bearOffFiltered(moves, state: state)
         let opponent = player.opponent
         let plies = searchPlies
 
